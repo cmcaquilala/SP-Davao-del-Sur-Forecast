@@ -2,13 +2,37 @@
 {% load static %}
 {% block title %}Rice Production{% endblock title %}
 
-{% block content %}
-<div class="container-fluid bg-secondary">
-    <h1>HELLO!</h1>
-</div>
 
-<div class="container-fluid">
-    <p>This is a sample page.</p>
-    <img src="{% static 'dashboard/testimg.png' %}" style="width: 500px;"/>
+{% block content %}
+<div class="container my-3">
+
+    <h5>SARIMA Model</h5>
+
+    <div class="row">
+        
+        <div class="col-8">
+            {% if sarima_chart %}
+        
+                <img src="data:image/png;base64, {{sarima_chart|safe}}"
+                    class="img-fluid">
+        
+            {% endif %}
+        </div>
+
+        <div class="col">
+            <p>Insert other information here</p>
+            <p>Insert other information here</p>
+            <p>Insert other information here</p>
+            <p>Insert other information here</p>
+        </div>
+
+    </div>
+
+
+    <!-- <ol>
+        {% for item in rice_data %}
+            <li>{{item.Volume}}</li>
+        {% endfor %}
+    </ol> -->
 </div>
 {% endblock content %}
