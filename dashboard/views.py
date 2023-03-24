@@ -19,9 +19,11 @@ import datetime as DateTime
 
 # Create your views here.
 def indexPage(request):
+    return render(request, 'dashboard/index.html')
 
-    # rice_data = pd.read_csv("rice data.csv")
-    # corn_data = pd.read_csv("corn data.csv")
+def ricePage(request):
+
+    dataset_name = "Rice"
 
     with open('static/rice data.csv') as file:
         reader = csv.reader(file)
@@ -44,14 +46,23 @@ def indexPage(request):
     my_order = (1,0,0)
     my_seasonal_order = (1, 0, 1, 4)
 
-    sarima_chart = model_sarima(rice_data, my_order, my_seasonal_order)
+    sarima_model = model_sarima(rice_data, "Rice", my_order, my_seasonal_order)
 
-    context = {
-        # 'rice_data' : arr,
-        'sarima_chart' : sarima_chart,
+    sarima_summary = {
+        'graph' : sarima_model["graph"],
+        'order' : my_order,
+        'seasonal_order' : my_seasonal_order,
+        'mse' : '{0:.2f}'.format(sarima_model["mse"]),
+        'rmse' : '{0:.4f}'.format(sarima_model["rmse"]),
+        'mape' : '{0:.4f}'.format(sarima_model["mape"]),
     }
 
-    return render(request, 'dashboard/index.html', context)
+    context = {
+        'dataset' : dataset_name,
+        'sarima' : sarima_summary,
+    }
+
+    return render(request, 'dashboard/graph_page.html', context)
 
 
 
@@ -81,11 +92,19 @@ def cornPage(request):
     my_order = (1,0,0)
     my_seasonal_order = (1, 0, 1, 4)
 
-    sarima_chart = model_sarima(corn_data, my_order, my_seasonal_order)
+    sarima_model = model_sarima(corn_data, "Corn", my_order, my_seasonal_order)
 
-    context = {
-        # 'corn_data' : arr,
-        'sarima_chart' : sarima_chart,
+    sarima_summary = {
+        'graph' : sarima_model["graph"],
+        'order' : my_order,
+        'seasonal_order' : my_seasonal_order,
+        'mse' : '{0:.2f}'.format(sarima_model["mse"]),
+        'rmse' : '{0:.4f}'.format(sarima_model["rmse"]),
+        'mape' : '{0:.4f}'.format(sarima_model["mape"]),
     }
 
-    return render(request, 'dashboard/index.html', context)
+    context = {
+        'sarima' : sarima_summary,
+    }
+
+    return render(request, 'dashboard/graph_page.html', context)

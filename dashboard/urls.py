@@ -7,6 +7,7 @@ from . import views
 
 urlpatterns = [
     path('', views.indexPage, name='indexPage'),
+    path('rice', views.ricePage, name='ricePage'),
     path('corn', views.cornPage, name='cornPage'),
 ]
 

@@ -1,0 +1,70 @@
+{% extends 'dashboard/base.html' %}
+{% load static %}
+{% block title %}Rice Production{% endblock title %}
+
+
+{% block content %}
+<div class="container my-3 py-3">
+
+    <div>
+        <h1 class="fw-bold">{{dataset}} Dataset</h1>
+        <p>Using the Rice dataset of Davao del Sur from 1987 to 2022.</p>
+        <hr>
+    </div>
+
+    <h2 class="fw-bold">SARIMA Model</h2>
+
+    <div class="row">
+        
+        <div class="col-8">
+            {% if sarima.graph %}
+        
+                <img src="data:image/png;base64, {{sarima.graph|safe}}"
+                    class="img-fluid">
+        
+            {% endif %}
+        </div>
+
+        <div class="col">
+            <h4>SARIMA Model</h4>
+            <hr>
+            <p><b>Order (p,q,r):</b> {{sarima.order}}</p>
+            <p><b>Seasonal Order (P,Q,R,S):</b> {{sarima.seasonal_order}}</p>
+
+            <p><b>MSE:</b> {{sarima.mse}}</p>
+            <p><b>RMSE:</b> {{sarima.rmse}}</p>
+            <p><b>MAPE:</b> {{sarima.mape}} %</p>
+        </div>
+
+    </div>
+
+    <br>
+
+    <h2 class="fw-bold">Bayesian ARMA Model</h2>
+
+    <div class="row">
+        
+        <div class="col-8">
+            <!-- {% if sarima_chart %}
+        
+                <img src="data:image/png;base64, {{sarima_chart|safe}}"
+                    class="img-fluid">
+        
+            {% endif %} -->
+        </div>
+
+        <div class="col">
+            <h4>Bayesian ARMA Model</h4>
+            <hr>
+            <p><b>Order (p,q,r):</b> {{order}}</p>
+            <p><b>Seasonal Order (P,Q,R,S):</b> {{seasonal_order}}</p>
+
+            <p><b>MSE:</b> {{mse}}</p>
+            <p><b>RMSE:</b> {{rmse}}</p>
+            <p><b>MAPE:</b> {{mape}} %</p>
+        </div>
+
+    </div>
+
+</div>
+{% endblock content %}
