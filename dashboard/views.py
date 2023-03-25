@@ -1,5 +1,6 @@
 from django.shortcuts import render
 from .utils import *
+from .models import *
 from django.templatetags.static import static
 
 import csv
@@ -36,30 +37,47 @@ def ricePage(request):
     rice_data = pd.DataFrame(readerlist, columns=['Date','Volume'])
     rice_data['Volume'] = pd.to_numeric(rice_data['Volume'])
     rice_data['Date'] = pd.to_datetime(rice_data['Date'])
-    # rice_data['Volume'] = rice_data['Volume'].astype(float)
-    # rice_data['Date'] = rice_data['Date'].astype(datetime)
 
-    # json_records = rice_data.reset_index().to_json(orient ='records')
-    # arr = []
-    # arr = json.loads(json_records)
+    # SARIMA Part
+    sarima_models = []
 
-    my_order = (1,0,0)
-    my_seasonal_order = (1, 0, 1, 4)
+    for x in SARIMAModel.objects.all():
+        my_order = (x.p_param,x.d_param,x.q_param)
+        my_seasonal_order = (x.sp_param, x.sd_param, x.sq_param, x.m_param)
 
-    sarima_model = model_sarima(rice_data, "Rice", my_order, my_seasonal_order)
+        sarima_model = model_sarima(rice_data, "Rice", my_order, my_seasonal_order)
 
-    sarima_summary = {
-        'graph' : sarima_model["graph"],
-        'order' : my_order,
-        'seasonal_order' : my_seasonal_order,
-        'mse' : '{0:.2f}'.format(sarima_model["mse"]),
-        'rmse' : '{0:.4f}'.format(sarima_model["rmse"]),
-        'mape' : '{0:.4f}'.format(sarima_model["mape"]),
-    }
+        x.mse = sarima_model["mse"]
+        x.rmse = sarima_model["rmse"]
+        x.mape = sarima_model["mape"]
+        x.mad = 0
+
+        x.save()
+
+        # x.update(mse = sarima_model["mse"])
+        # x.update(rmse = sarima_model["rmse"])
+        # x.update(mape = sarima_model["mape"])
+        # x.update(mad = 0)
+
+        # sarima_summary = {
+        #     'graph' : sarima_model["graph"],
+        #     'order' : my_order,
+        #     'seasonal_order' : my_seasonal_order,
+        #     'mse' : '{0:.2f}'.format(sarima_model["mse"]),
+        #     'rmse' : '{0:.4f}'.format(sarima_model["rmse"]),
+        #     'mape' : '{0:.4f}'.format(sarima_model["mape"]),
+        # }
+
+        sarima_models.append({
+            'model' : x,
+            'graph' : sarima_model["graph"]
+        })
+
+    # Bayesian ARMA Part
 
     context = {
         'dataset' : dataset_name,
-        'sarima' : sarima_summary,
+        'sarima_models' : sarima_models,
     }
 
     return render(request, 'dashboard/graph_page.html', context)

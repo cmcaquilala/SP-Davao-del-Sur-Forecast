@@ -70,7 +70,7 @@ def model_sarima(df, dataset_name, my_order, my_seasonal_order):
 	plt.xlim([df['Date'][0],df['Date'][df['Date'].size-1]])
 	plt.plot(df['Date'], df['Volume'])
 	plt.plot(test_set['Date'], predictions)
-	plot_title = 'Quarterly ' + dataset_name + ' Production Volume of Davao del Sur'
+	plot_title = 'Quarterly ' + dataset_name + ' Production Volume of Davao del Sur Using SARIMA' + str(my_order) + str(my_seasonal_order)
 	plt.title(plot_title)
 	plt.ylabel('Volume in Tons')
 	plt.xlabel('Date')
@@ -92,7 +92,7 @@ def get_MSE(actual, predictions):
 	for i in range(actual.size):
 		total += (actual[i] - predictions[i])**2
 
-	return total / (actual.size)
+	return total / (actual.size - 1)
 
 def get_RMSE(actual, predictions):
 	total = 0
@@ -100,7 +100,7 @@ def get_RMSE(actual, predictions):
 	for i in range(actual.size):
 		total += (actual[i] - predictions[i])**2
 
-	return math.sqrt(total / (actual.size))
+	return math.sqrt(total / (actual.size - 1))
 
 def get_MAPE(actual, predictions):
 	total = 0
@@ -108,4 +108,4 @@ def get_MAPE(actual, predictions):
 	for i in range(actual.size):
 		total += math.fabs((actual[i] - predictions[i]) / actual[i])
 
-	return total / (actual.size)
+	return (total / (actual.size)) * 100
