@@ -20,12 +20,10 @@ import pandas as pd
 import datetime as DateTime
 
 # Create your views here.
-def indexPage(request):
+def index_page(request):
     return render(request, 'dashboard/index.html')
 
-def ricePage(request):
-
-    # Start of others
+def rice_page_add_sarima(request):
     dataset_name = "Rice"
 
     with open('static/rice data.csv') as file:
@@ -39,9 +37,6 @@ def ricePage(request):
     rice_data = pd.DataFrame(readerlist, columns=['Date','Volume'])
     rice_data['Volume'] = pd.to_numeric(rice_data['Volume'])
     rice_data['Date'] = pd.to_datetime(rice_data['Date'])
-
-    # Loads forms for modal
-    sarima_form = SARIMA_add_form(request.POST)
 
     if request.method == "POST":
         form = SARIMA_add_form(request.POST)
@@ -62,38 +57,44 @@ def ricePage(request):
             model.mad = 0
 
             model.save()
+    
+    return redirect('rice_page')
 
-        return redirect('ricePage')
+def rice_page_delete_sarima(request, id):
+    model = SARIMAModel.objects.get(id=id)
+    model.delete()
+
+    return redirect('rice_page')
+
+def rice_page(request):
+
+    # Start of others
+    dataset_name = "Rice"
+
+    with open('static/rice data.csv') as file:
+        reader = csv.reader(file)
+        readerlist = []
+        next(reader)
+        
+        for row in reader:
+            readerlist.append(row)
+
+    rice_data = pd.DataFrame(readerlist, columns=['Date','Volume'])
+    rice_data['Volume'] = pd.to_numeric(rice_data['Volume'])
+    rice_data['Date'] = pd.to_datetime(rice_data['Date'])
+
+    # Loads forms for modal
+    sarima_form = SARIMA_add_form(request.POST)
 
     # SARIMA Part
     sarima_models = []
 
     for x in SARIMAModel.objects.all():
-
         # sarima_model = model_sarima(rice_data, "Rice", my_order, my_seasonal_order)
-
-        sarima_models.append({
-            'model' : x,
-        })
-
-    # for x in SARIMAModel.objects.all():
-    #     my_order = (x.p_param,x.d_param,x.q_param)
-    #     my_seasonal_order = (x.sp_param, x.sd_param, x.sq_param, x.m_param)
-
-    #     sarima_model = model_sarima(rice_data, "Rice", my_order, my_seasonal_order)
-
-    #     x.mse = sarima_model["mse"]
-    #     x.rmse = sarima_model["rmse"]
-    #     x.mape = sarima_model["mape"]
-    #     x.mad = 0
-
-    #     x.graph = sarima_model["graph"]
-
-    #     x.save()
-
-    #     sarima_models.append({
-    #         'model' : x,
-    #     })
+        # sarima_models.append({
+        #     'model' : x,
+        # })
+        sarima_models.append(x)
 
     # Bayesian ARMA Part
     bayesian_arma_models = []
@@ -110,25 +111,10 @@ def ricePage(request):
 
         x.save()
 
-        # x.update(mse = sarima_model["mse"])
-        # x.update(rmse = sarima_model["rmse"])
-        # x.update(mape = sarima_model["mape"])
-        # x.update(mad = 0)
-
-        # sarima_summary = {
-        #     'graph' : sarima_model["graph"],
-        #     'order' : my_order,
-        #     'seasonal_order' : my_seasonal_order,
-        #     'mse' : '{0:.2f}'.format(sarima_model["mse"]),
-        #     'rmse' : '{0:.4f}'.format(sarima_model["rmse"]),
-        #     'mape' : '{0:.4f}'.format(sarima_model["mape"]),
-        # }
-
         bayesian_arma_models.append({
             'model' : x,
             'graph' : bayesian_arma_model["graph"]
         })
-
 
     # End of Bayesian ARMA
 
@@ -141,21 +127,7 @@ def ricePage(request):
 
     return render(request, 'dashboard/graph_page.html', context)
 
-def riceAddSARIMA(request):
-    form = SARIMA_add_form(request.POST)
 
-    if request.method == "POST":
-        form = SARIMA_add_form(request.POST)
-
-
-
-        if(form.is_valid()):
-            form.save()
-
-        return redirect('ricePage')
-
-    context = {'form' : form}
-    return(render(request, context))
 
 def cornPage(request):
 

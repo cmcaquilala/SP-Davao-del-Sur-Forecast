@@ -179,10 +179,7 @@ def model_bayesian(df, dataset_name, my_order):
 		"rmse" : model_RMSE,
 		"mape" : model_MAPE,
 	}
-
-    
 	
-
 def get_MSE(actual, predictions):
 	total = 0
 
