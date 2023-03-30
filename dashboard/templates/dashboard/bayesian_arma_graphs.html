@@ -1,0 +1,55 @@
+{% load static %}
+{% load crispy_forms_tags %}
+{% for model in bayesian_arma_models %}
+<!-- Model Display -->
+    <div class="row">
+        
+        <div class="col-8">
+            {% if model.graph %}
+        
+                <img src="data:image/png;base64, {{model.graph|safe}}"
+                    class="img-fluid">
+        
+            {% endif %}
+        </div>
+
+        <div class="col">
+            <div class="row">
+                <div class="col">
+                    <h4>Bayesian ARMA Model</h4>
+                </div>
+                <div class="col-auto">
+                    <a class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#edit">Edit</a>
+                </div>
+                <div class="col-auto">
+                    <a class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#delete">Delete</a>
+                </div>
+            </div>
+            <hr>
+            <p><b>Order (p,q):</b> ({{model.model.p_param}},{{model.model.q_param}})</p>
+
+            <p><b>MSE:</b> {{model.model.mse}}</p>
+            <p><b>RMSE:</b> {{model.model.rmse}}</p>
+            <p><b>MAPE:</b> {{model.model.mape}} %</p>
+        </div>
+
+    </div>
+<!-- End Model Display -->
+
+<!-- Modals -->
+
+<!-- Add -->
+
+<!-- End Add -->
+
+<!-- Edit -->
+
+<!-- End Edit -->
+
+<!-- Delete -->
+
+<!-- End Delete -->
+
+<!-- End Modals -->
+
+{% endfor %}

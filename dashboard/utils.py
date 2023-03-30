@@ -1,6 +1,6 @@
 import base64
 from io import BytesIO
-import datetime as DateTime
+from datetime import datetime
 import math
 
 # stat-related
@@ -13,6 +13,11 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
+import pymc as pm
+# import numpy as np
+# import matplotlib.pyplot as plt
+import seaborn as sns
+# from statsmodels.tsa.arima_model import ARIMA
 
 def get_graph():
 	buffer = BytesIO()
@@ -42,9 +47,9 @@ def model_sarima(df, dataset_name, my_order, my_seasonal_order):
 	# Transformation
 	transf_df_data = train_set.copy()
 
-	transf_df_data['Volume'] = np.log(train_set['Volume'])
-	transf_df_data['Volume'] = transf_df_data['Volume'].diff()
-	transf_df_data = transf_df_data.drop(transf_df_data.index[0])
+	# transf_df_data['Volume'] = np.log(train_set['Volume'])
+	# transf_df_data['Volume'] = transf_df_data['Volume'].diff()
+	# transf_df_data = transf_df_data.drop(transf_df_data.index[0])
 
 	# Model Creation
 	model = SARIMAX(train_set['Volume'], order=my_order, seasonal_order=my_seasonal_order)
@@ -76,15 +81,107 @@ def model_sarima(df, dataset_name, my_order, my_seasonal_order):
 	plt.xlabel('Date')
 	plt.xticks(rotation=45)
 	plt.grid(True)
+
+	filename = "static/models/SARIMA({0})({1}){2}.png".format(str(my_order), str(my_seasonal_order),str((datetime.now() - datetime.utcfromtimestamp(0)).total_seconds() * 1000.0))
+	plt.savefig(filename, format = "png")
 	graph = get_graph()
 
 	return {
 		"graph" : graph,
+		"filename" : filename,
 		"model" : model,
 		"mse" : model_MSE,
 		"rmse" : model_RMSE,
 		"mape" : model_MAPE,
 	}
+
+def model_bayesian(df, dataset_name, my_order):
+	train_set = df[1:132]
+	test_set = df[132:]
+
+	num_samples = 10000
+	forecasted_vals = []
+	num_periods = test_set['Volume'].size
+
+	with pm.Model() as bayes_model:
+		#priors
+		phi = pm.Normal("phi", mu=0, sigma=1, shape=my_order[0])
+		# delta = pm.Normal("delta", mu=0, sigma=1, shape=q_param)
+		sigma = pm.InverseGamma("sigma", alpha=0.01, beta=0.01)
+		#Likelihood
+		likelihood = pm.AR("x", phi, sigma, observed=train_set['Volume'])
+		#posterior
+		trace = pm.sample(1000, cores=2)
+
+	phi1_vals = trace.posterior.phi[0][:,0]
+	phi2_vals = trace.posterior.phi[0][:,1]
+	sigma_vals = trace.posterior.sigma[0]
+
+    # print(sigma_vals)
+
+	for _ in range(num_samples):
+		curr_vals = list(train_set['Volume'].copy())
+        
+		phi1_val = np.random.choice(phi1_vals)
+		phi2_val = np.random.choice(phi2_vals)
+		sigma_val = np.random.choice(sigma_vals)
+        
+		for _ in range(num_periods):
+			curr_vals.append(curr_vals[-1]*phi1_val + curr_vals[-2]*phi2_val + np.random.normal(0, sigma_val))
+		forecasted_vals.append(curr_vals[-num_periods:]) 
+	forecasted_vals = np.array(forecasted_vals)
+
+	obtained_means = []
+	for i in range(num_periods):
+		plt.figure(figsize=(10,4))
+		vals = forecasted_vals[:,i]
+		mu, dev = round(vals.mean(), 3), round(vals.std(), 3)
+		sns.distplot(vals)
+		# p1 = plt.axvline(forecast[0][i], color='k')
+		p2 = plt.axvline(vals.mean(), color='b')
+		obtained_means.append(vals.mean())
+		# plt.legend((p1,p2), ('MLE', 'Posterior Mean'), fontsize=20)
+		# plt.legend(p2, 'Posterior Mean', fontsize=20)
+		# plt.title('Forecasted t+%s\nPosterior Mean: %s\nMLE: %s\nSD Bayes: %s\nSD MLE: %s'%((i+1), mu, round(forecast[0][i],3), dev, round(forecast[1][i],3)), fontsize=20)
+
+	# Diagnostics
+
+	# Test Set Fitting
+	predictions = obtained_means
+	predictions = pd.Series(predictions, index=test_set.index)
+	# residuals = test_set['Volume'] - predictions
+
+	# Model Evaluation
+	model_MSE = get_MSE(test_set['Volume'].values,predictions.values)
+	model_RMSE = get_RMSE(test_set['Volume'].values,predictions.values)
+	model_MAPE = get_MAPE(test_set['Volume'].values,predictions.values)
+
+	# Graph Plotting
+	points_to_display = 100
+
+	plt.figure(figsize=[15, 7.5]); # Set dimensions for figure
+	# plt.xlim([points_to_display,df.size-points_to_display])
+	plt.xlim([df['Date'][0],df['Date'][df['Date'].size-1]])
+	plt.plot(df['Date'], df['Volume'])
+	plt.plot(test_set['Date'], predictions)
+	plot_title = 'Quarterly ' + dataset_name + ' Production Volume of Davao del Sur Using Bayesian ARMA' + str(my_order)
+	plt.title(plot_title)
+	plt.ylabel('Volume in Tons')
+	plt.xlabel('Date')
+	plt.xticks(rotation=45)
+	plt.grid(True)
+	graph = get_graph()
+
+	return {
+		"graph" : graph,
+		# "model" : model,
+		"mse" : model_MSE,
+		"rmse" : model_RMSE,
+		"mape" : model_MAPE,
+	}
+
+    
+	
 
 def get_MSE(actual, predictions):
 	total = 0

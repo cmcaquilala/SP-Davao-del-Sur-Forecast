@@ -1,6 +1,7 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from .utils import *
 from .models import *
+from .forms import *
 from django.templatetags.static import static
 
 import csv
@@ -24,6 +25,18 @@ def indexPage(request):
 
 def ricePage(request):
 
+    # Loads forms for modal
+    sarima_form = SARIMA_add_form(request.POST)
+
+    if request.method == "POST":
+        form = SARIMA_add_form(request.POST)
+
+        if(form.is_valid()):
+            form.save()
+
+        return redirect('ricePage')
+
+    # Start of others
     dataset_name = "Rice"
 
     with open('static/rice data.csv') as file:
@@ -52,6 +65,8 @@ def ricePage(request):
         x.mape = sarima_model["mape"]
         x.mad = 0
 
+        x.sarima_model.filename
+
         x.save()
 
         # x.update(mse = sarima_model["mse"])
@@ -74,15 +89,66 @@ def ricePage(request):
         })
 
     # Bayesian ARMA Part
+    bayesian_arma_models = []
+
+    for x in BayesianARMAModel.objects.all():
+        my_order = (x.p_param,x.q_param)
+
+        bayesian_arma_model = model_bayesian(rice_data, "Rice", my_order)
+
+        x.mse = bayesian_arma_model["mse"]
+        x.rmse = bayesian_arma_model["rmse"]
+        x.mape = bayesian_arma_model["mape"]
+        x.mad = 0
+
+        x.save()
+
+        # x.update(mse = sarima_model["mse"])
+        # x.update(rmse = sarima_model["rmse"])
+        # x.update(mape = sarima_model["mape"])
+        # x.update(mad = 0)
+
+        # sarima_summary = {
+        #     'graph' : sarima_model["graph"],
+        #     'order' : my_order,
+        #     'seasonal_order' : my_seasonal_order,
+        #     'mse' : '{0:.2f}'.format(sarima_model["mse"]),
+        #     'rmse' : '{0:.4f}'.format(sarima_model["rmse"]),
+        #     'mape' : '{0:.4f}'.format(sarima_model["mape"]),
+        # }
+
+        bayesian_arma_models.append({
+            'model' : x,
+            'graph' : bayesian_arma_model["graph"]
+        })
+
+
+    # End of Bayesian ARMA
 
     context = {
         'dataset' : dataset_name,
         'sarima_models' : sarima_models,
+        'bayesian_arma_models' : bayesian_arma_models,
+        'sarima_form' : sarima_form,
     }
 
     return render(request, 'dashboard/graph_page.html', context)
 
+def riceAddSARIMA(request):
+    form = SARIMA_add_form(request.POST)
 
+    if request.method == "POST":
+        form = SARIMA_add_form(request.POST)
+
+
+
+        if(form.is_valid()):
+            form.save()
+
+        return redirect('ricePage')
+
+    context = {'form' : form}
+    return(render(request, context))
 
 def cornPage(request):
 

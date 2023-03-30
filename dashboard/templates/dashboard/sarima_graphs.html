@@ -1,0 +1,97 @@
+{% load static %}
+{% load crispy_forms_tags %}
+<!-- Add Sarima -->
+<div class="modal fade" id="addsarima" tabindex="-1" aria-labelledby="addmodal" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable modal-lg">
+        <form method="POST" action="" enctype = "multipart/form-data">
+            {% csrf_token %}
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Add a SARIMA Model</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <div class="modal-body p-3">
+
+                    <!-- <div>
+                        <span>
+                            <b>Order:</b> (
+                                {{ sarima_form.p_param | as_crispy_field }},
+                                {{ sarima_form.d_param | as_crispy_field }},
+                                {{ sarima_form.q_param | as_crispy_field }}
+                            )
+                            (
+                                {{ sarima_form.sp_param | as_crispy_field }},
+                                {{ sarima_form.sd_param | as_crispy_field }},
+                                {{ sarima_form.sq_param | as_crispy_field }}
+                            ) {{ sarima_form.m_param | as_crispy_field }}
+                        </span>
+                    </div> -->
+
+                    {{ sarima_form | crispy }}
+
+                </div>
+                
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="Submit" class="btn btn-danger">Save changes</button>
+                    <!-- {% comment %} <button type="button" class="btn btn-danger" href="{% url 'removeRecord' record.id %}">Save changes</button> {% endcomment %} -->
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+<!-- End Add Sarima -->
+
+<h2 class="fw-bold">SARIMA Models</h2>
+
+{% for model in sarima_models %}
+<!-- Model Display -->
+    <div class="row">
+        
+        <div class="col-8">
+            {% if model.graph %}
+        
+                <img src="data:image/png;base64, {{model.graph|safe}}"
+                    class="img-fluid">
+        
+            {% endif %}
+        </div>
+
+        <div class="col">
+            <div class="row">
+                <div class="col">
+                    <h4>SARIMA Model</h4>
+                </div>
+                <!-- <div class="col-auto">
+                    <a class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#editsarima{{model.id}}">Edit</a>
+                </div> -->
+                <div class="col-auto">
+                    <a class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deletesarima{{model.id}}">Delete</a>
+                </div>
+            </div>
+            <hr>
+            <p><b>Order (p,d,q):</b> ({{model.model.p_param}},{{model.model.d_param}},{{model.model.q_param}})</p>
+            <p><b>Seasonal Order (P,D,Q)M:</b> ({{model.model.sp_param}},{{model.model.sd_param}},{{model.model.sq_param}}){{model.model.m_param}}</p>
+
+            <p><b>MSE:</b> {{model.model.mse}}</p>
+            <p><b>RMSE:</b> {{model.model.rmse}}</p>
+            <p><b>MAPE:</b> {{model.model.mape}} %</p>
+        </div>
+
+    </div>
+<!-- End Model Display -->
+
+<!-- Modals -->
+
+<!-- Edit -->
+
+<!-- End Edit -->
+
+<!-- Delete -->
+
+<!-- End Delete -->
+
+<!-- End Modals -->
+
+{% endfor %}
