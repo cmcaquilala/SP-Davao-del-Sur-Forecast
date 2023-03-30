@@ -13,7 +13,7 @@
 <!-- Add Bayesian -->
 <div class="modal fade" id="addbayesian">
     <div class="modal-dialog modal-dialog-scrollable modal-lg">
-        <form method="POST" action="{% url 'rice_page_add_bayesian' %}" enctype="multipart/form-data">
+        <form method="POST" action="{% url 'add_bayesian' dataset %}" enctype="multipart/form-data">
             {% csrf_token %}
             <div class="modal-content">
                 <div class="modal-header">
@@ -96,7 +96,7 @@
             
             <div class="modal-footer">
                 <button type="button" class="btn-outline-dark" data-bs-dismiss="modal">Cancel</button>
-                <a class="btn btn-danger" href="{% url 'rice_page_delete_bayesian' model.id %}"><i class="fa-solid fa-trash"></i> Delete</a>
+                <a class="btn btn-danger" href="{% url 'delete_bayesian' dataset model.id %}"><i class="fa-solid fa-trash"></i> Delete</a>
                 <!-- {% comment %} <button type="button" class="btn btn-danger" href="{% url 'removeRecord' record.id %}">Save changes</button> {% endcomment %} -->
             </div>
         </div>
@@ -104,5 +104,12 @@
     </div>
 </div>
 <!-- End Delete -->
+
+{% empty %}
+
+<br>
+<div class="container bg-light p-5 rounded font-weight-light">
+    <p class="text-center text-secondary">There are no models.</p>
+</div>
 
 {% endfor %}

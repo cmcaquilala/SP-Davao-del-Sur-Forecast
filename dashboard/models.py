@@ -2,6 +2,7 @@ from django.db import models
 from django.core.validators import MinValueValidator
 
 class SARIMAModel(models.Model):
+    dataset = models.TextField(null=True)
     p_param = models.SmallIntegerField(validators=[MinValueValidator(0)])
     d_param = models.SmallIntegerField(validators=[MinValueValidator(0)])
     q_param = models.SmallIntegerField(validators=[MinValueValidator(0)])
@@ -17,10 +18,11 @@ class SARIMAModel(models.Model):
     graph = models.ImageField(null=True)
 
     def __str__(self):
-        formatted = "SARIMA(" + str(self.p_param) + ", " + str(self.d_param) + ", " + str(self.q_param) + ")(" +  str(self.sp_param) + ", " +  str(self.sd_param) + ", " +  str(self.sq_param) + ")" + str(self.m_param)
+        formatted = self.dataset + " SARIMA(" + str(self.p_param) + ", " + str(self.d_param) + ", " + str(self.q_param) + ")(" +  str(self.sp_param) + ", " +  str(self.sd_param) + ", " +  str(self.sq_param) + ")" + str(self.m_param)
         return formatted
 
 class BayesianARMAModel(models.Model):
+    dataset = models.TextField(null=True)
     p_param = models.SmallIntegerField(validators=[MinValueValidator(0)])
     q_param = models.SmallIntegerField(validators=[MinValueValidator(0)])
     rmse = models.DecimalField(max_digits=20, decimal_places=4,default=0)
@@ -31,5 +33,5 @@ class BayesianARMAModel(models.Model):
     graph = models.ImageField(null=True)
 
     def __str__(self):
-        formatted = "Bayesian ARMA(" + str(self.p_param) + ',' + str(self.q_param) + ")" 
+        formatted = self.dataset + "Bayesian ARMA(" + str(self.p_param) + ',' + str(self.q_param) + ")" 
         return formatted
