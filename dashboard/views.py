@@ -66,6 +66,47 @@ def rice_page_delete_sarima(request, id):
 
     return redirect('rice_page')
 
+def rice_page_add_bayesian(request):
+    dataset_name = "Rice"
+
+    with open('static/rice data.csv') as file:
+        reader = csv.reader(file)
+        readerlist = []
+        next(reader)
+        
+        for row in reader:
+            readerlist.append(row)
+
+    rice_data = pd.DataFrame(readerlist, columns=['Date','Volume'])
+    rice_data['Volume'] = pd.to_numeric(rice_data['Volume'])
+    rice_data['Date'] = pd.to_datetime(rice_data['Date'])
+
+    if request.method == "POST":
+        form = Bayesian_ARMA_add_form(request.POST)
+
+        if(form.is_valid()):
+
+            model = form.save(False)
+
+            my_order = (int(request.POST["p_param"]),int(request.POST["q_param"]))
+            bayesian_arma_model = model_bayesian(rice_data, "Rice", my_order)
+
+            model.graph = bayesian_arma_model["graph"]
+            model.mse = bayesian_arma_model["mse"]
+            model.rmse = bayesian_arma_model["rmse"]
+            model.mape = bayesian_arma_model["mape"]
+            model.mad = 0
+
+            model.save()
+    
+    return redirect('rice_page')
+
+def rice_page_delete_bayesian(request, id):
+    model = BayesianARMAModel.objects.get(id=id)
+    model.delete()
+
+    return redirect('rice_page')
+
 def rice_page(request):
 
     # Start of others
@@ -85,36 +126,19 @@ def rice_page(request):
 
     # Loads forms for modal
     sarima_form = SARIMA_add_form(request.POST)
+    bayesian_form = Bayesian_ARMA_add_form(request.POST)
 
     # SARIMA Part
     sarima_models = []
 
     for x in SARIMAModel.objects.all():
-        # sarima_model = model_sarima(rice_data, "Rice", my_order, my_seasonal_order)
-        # sarima_models.append({
-        #     'model' : x,
-        # })
         sarima_models.append(x)
 
     # Bayesian ARMA Part
     bayesian_arma_models = []
 
     for x in BayesianARMAModel.objects.all():
-        my_order = (x.p_param,x.q_param)
-
-        bayesian_arma_model = model_bayesian(rice_data, "Rice", my_order)
-
-        x.mse = bayesian_arma_model["mse"]
-        x.rmse = bayesian_arma_model["rmse"]
-        x.mape = bayesian_arma_model["mape"]
-        x.mad = 0
-
-        x.save()
-
-        bayesian_arma_models.append({
-            'model' : x,
-            'graph' : bayesian_arma_model["graph"]
-        })
+        bayesian_arma_models.append(x)
 
     # End of Bayesian ARMA
 
@@ -123,6 +147,7 @@ def rice_page(request):
         'sarima_models' : sarima_models,
         'bayesian_arma_models' : bayesian_arma_models,
         'sarima_form' : sarima_form,
+        'bayesian_form' : bayesian_form,
     }
 
     return render(request, 'dashboard/graph_page.html', context)

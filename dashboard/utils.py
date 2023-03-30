@@ -105,7 +105,7 @@ def model_bayesian(df, dataset_name, my_order):
 
 	with pm.Model() as bayes_model:
 		#priors
-		phi = pm.Normal("phi", mu=0, sigma=1, shape=my_order[0])
+		phi = pm.Normal("phi", mu=0, sigma=1, shape=my_order[1])
 		# delta = pm.Normal("delta", mu=0, sigma=1, shape=q_param)
 		sigma = pm.InverseGamma("sigma", alpha=0.01, beta=0.01)
 		#Likelihood

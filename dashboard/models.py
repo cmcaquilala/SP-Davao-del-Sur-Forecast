@@ -28,6 +28,7 @@ class BayesianARMAModel(models.Model):
     mape = models.DecimalField(max_digits=20, decimal_places=4,default=0)
     mad = models.DecimalField(max_digits=20, decimal_places=4,default=0)
     order = models.SmallIntegerField(validators=[MinValueValidator(0)],default=0)
+    graph = models.ImageField(null=True)
 
     def __str__(self):
         formatted = "Bayesian ARMA(" + str(self.p_param) + ',' + str(self.q_param) + ")" 

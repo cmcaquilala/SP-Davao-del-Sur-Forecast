@@ -1,55 +1,108 @@
 {% load static %}
 {% load crispy_forms_tags %}
+<div class="row">
+    <div class="col-auto">
+        <h2 class="fw-bold">Bayesian ARMA Models</h2>
+    </div>
+
+    <div class="col-auto"> 
+        <a class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addbayesian">Add Model</a>
+    </div>
+</div>
+
+<!-- Add Bayesian -->
+<div class="modal fade" id="addbayesian">
+    <div class="modal-dialog modal-dialog-scrollable modal-lg">
+        <form method="POST" action="{% url 'rice_page_add_bayesian' %}" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Add a Bayesian ARMA Model</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <div class="modal-body p-3">
+
+                    {{ bayesian_form | crispy }}
+
+                </div>
+                
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-dark" data-bs-dismiss="modal">Close</button>
+                    <button type="Submit" class="btn btn-primary" >Save changes</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+<!-- End Add bayesian -->
+
 {% for model in bayesian_arma_models %}
 <!-- Model Display -->
     <div class="row">
         
         <div class="col-8">
-            {% if model.graph %}
+            <!-- {% if model.graph %}
         
                 <img src="data:image/png;base64, {{model.graph|safe}}"
                     class="img-fluid">
         
+            {% endif %} -->
+
+            {% if model.graph %}
+        
+            <img src="data:image/png;base64, {{model.graph|safe}}"
+                class="img-fluid">
+    
             {% endif %}
         </div>
 
         <div class="col">
             <div class="row">
                 <div class="col">
-                    <h4>Bayesian ARMA Model</h4>
+                    <h4>Bayesian ARMA({{model.p_param}},{{model.q_param}})</h4>
                 </div>
+                <!-- <div class="col-auto">
+                    <a class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#editbayesian{{model.id}}">Edit</a>
+                </div> -->
                 <div class="col-auto">
-                    <a class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#edit">Edit</a>
-                </div>
-                <div class="col-auto">
-                    <a class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#delete">Delete</a>
+                    <a class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deletebayesian{{model.id}}">Delete</a>
                 </div>
             </div>
             <hr>
-            <p><b>Order (p,q):</b> ({{model.model.p_param}},{{model.model.q_param}})</p>
+            <p><b>Order (p,q):</b> ({{model.p_param}},{{model.q_param}})</p>
 
-            <p><b>MSE:</b> {{model.model.mse}}</p>
-            <p><b>RMSE:</b> {{model.model.rmse}}</p>
-            <p><b>MAPE:</b> {{model.model.mape}} %</p>
+            <p><b>MSE:</b> {{model.mse}}</p>
+            <p><b>RMSE:</b> {{model.rmse}}</p>
+            <p><b>MAPE:</b> {{model.mape}} %</p>
         </div>
 
     </div>
 <!-- End Model Display -->
 
-<!-- Modals -->
-
-<!-- Add -->
-
-<!-- End Add -->
-
-<!-- Edit -->
-
-<!-- End Edit -->
-
 <!-- Delete -->
+<div class="modal fade" id="deletebayesian{{model.id}}" aria-labelledby="deletemodal" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
 
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Delete Model</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            
+            <div class="modal-body p-3">
+                <p>Are you sure you want to delete this model?</p>
+            </div>
+            
+            <div class="modal-footer">
+                <button type="button" class="btn-outline-dark" data-bs-dismiss="modal">Cancel</button>
+                <a class="btn btn-danger" href="{% url 'rice_page_delete_bayesian' model.id %}"><i class="fa-solid fa-trash"></i> Delete</a>
+                <!-- {% comment %} <button type="button" class="btn btn-danger" href="{% url 'removeRecord' record.id %}">Save changes</button> {% endcomment %} -->
+            </div>
+        </div>
+
+    </div>
+</div>
 <!-- End Delete -->
-
-<!-- End Modals -->
 
 {% endfor %}

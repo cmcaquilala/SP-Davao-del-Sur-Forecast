@@ -1,9 +1,19 @@
 {% load static %}
 {% load crispy_forms_tags %}
+<div class="row">
+    <div class="col-auto">
+        <h2 class="fw-bold">SARIMA Models</h2>
+    </div>
+
+    <div class="col-auto"> 
+        <a class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addsarima">Add Model</a>
+    </div>
+</div>
+
 <!-- Add Sarima -->
-<div class="modal fade" id="addsarima" tabindex="-1" aria-labelledby="addmodal" aria-hidden="true">
+<div class="modal fade" id="addsarima">
     <div class="modal-dialog modal-dialog-scrollable modal-lg">
-        <form method="POST" action="{% url 'rice_page_add_sarima' %}" enctype = "multipart/form-data">
+        <form method="POST" action="{% url 'rice_page_add_sarima' %}" enctype="multipart/form-data">
             {% csrf_token %}
             <div class="modal-content">
                 <div class="modal-header">
@@ -33,17 +43,14 @@
                 </div>
                 
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="Submit" class="btn btn-danger" >Save changes</button>
-                    <!-- {% comment %} <button type="button" class="btn btn-danger" href="{% url 'removeRecord' record.id %}">Save changes</button> {% endcomment %} -->
+                    <button type="button" class="btn btn-outline-dark" data-bs-dismiss="modal">Close</button>
+                    <button type="Submit" class="btn btn-primary" >Save changes</button>
                 </div>
             </div>
         </form>
     </div>
 </div>
 <!-- End Add Sarima -->
-
-<h2 class="fw-bold">SARIMA Models</h2>
 
 {% for model in sarima_models %}
 <!-- Model Display -->
@@ -68,7 +75,7 @@
         <div class="col">
             <div class="row">
                 <div class="col">
-                    <h4>SARIMA Model</h4>
+                    <h4>SARIMA ({{model.p_param}},{{model.d_param}},{{model.q_param}})({{model.sp_param}},{{model.sd_param}},{{model.sq_param}})<sub>{{model.m_param}}</sub></h4>
                 </div>
                 <!-- <div class="col-auto">
                     <a class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#editsarima{{model.id}}">Edit</a>
@@ -79,7 +86,7 @@
             </div>
             <hr>
             <p><b>Order (p,d,q):</b> ({{model.p_param}},{{model.d_param}},{{model.q_param}})</p>
-            <p><b>Seasonal Order (P,D,Q)M:</b> ({{model.sp_param}},{{model.sd_param}},{{model.sq_param}}){{model.m_param}}</p>
+            <p><b>Seasonal Order (P,D,Q)M:</b> ({{model.sp_param}},{{model.sd_param}},{{model.sq_param}})<sub>{{model.m_param}}</sub></h4></p>
 
             <p><b>MSE:</b> {{model.mse}}</p>
             <p><b>RMSE:</b> {{model.rmse}}</p>
@@ -104,7 +111,7 @@
             </div>
             
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-outline-dark" data-bs-dismiss="modal">Cancel</button>
                 <a class="btn btn-danger" href="{% url 'rice_page_delete_sarima' model.id %}"><i class="fa-solid fa-trash"></i> Delete</a>
                 <!-- {% comment %} <button type="button" class="btn btn-danger" href="{% url 'removeRecord' record.id %}">Save changes</button> {% endcomment %} -->
             </div>

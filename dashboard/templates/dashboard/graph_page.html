@@ -10,15 +10,13 @@
     <div>
         <h1 class="fw-bold">{{dataset}} Dataset</h1>
         <p>Using the Rice dataset of Davao del Sur from 1987 to 2022.</p>
-        <a class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addsarima">Add Model</a>
         <hr>
     </div>
 
     {% include 'dashboard/sarima_graphs.html' %}
 
     <br>
-
-    <h2 class="fw-bold">Bayesian ARMA Model</h2>
+    <hr>
 
     {% include 'dashboard/bayesian_arma_graphs.html' %}
 
