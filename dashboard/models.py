@@ -14,6 +14,7 @@ class SARIMAModel(models.Model):
     mape = models.DecimalField(max_digits=20, decimal_places=4,default=0)
     mad = models.DecimalField(max_digits=20, decimal_places=4,default=0)
     order = models.SmallIntegerField(validators=[MinValueValidator(0)],default=0)
+    graph = models.ImageField(null=True)
 
     def __str__(self):
         formatted = "SARIMA(" + str(self.p_param) + ", " + str(self.d_param) + ", " + str(self.q_param) + ")(" +  str(self.sp_param) + ", " +  str(self.sd_param) + ", " +  str(self.sq_param) + ")" + str(self.m_param)

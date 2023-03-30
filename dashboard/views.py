@@ -25,17 +25,6 @@ def indexPage(request):
 
 def ricePage(request):
 
-    # Loads forms for modal
-    sarima_form = SARIMA_add_form(request.POST)
-
-    if request.method == "POST":
-        form = SARIMA_add_form(request.POST)
-
-        if(form.is_valid()):
-            form.save()
-
-        return redirect('ricePage')
-
     # Start of others
     dataset_name = "Rice"
 
@@ -51,42 +40,60 @@ def ricePage(request):
     rice_data['Volume'] = pd.to_numeric(rice_data['Volume'])
     rice_data['Date'] = pd.to_datetime(rice_data['Date'])
 
+    # Loads forms for modal
+    sarima_form = SARIMA_add_form(request.POST)
+
+    if request.method == "POST":
+        form = SARIMA_add_form(request.POST)
+
+        if(form.is_valid()):
+
+            model = form.save(False)
+
+            my_order = (int(request.POST["p_param"]),int(request.POST["d_param"]),int(request.POST["q_param"]))
+            my_seasonal_order = (int(request.POST["sp_param"]), int(request.POST["sd_param"]), int(request.POST["sq_param"]), int(request.POST["m_param"]))
+
+            sarima_model = model_sarima(rice_data, "Rice", my_order, my_seasonal_order)
+
+            model.graph = sarima_model["graph"]
+            model.mse = sarima_model["mse"]
+            model.rmse = sarima_model["rmse"]
+            model.mape = sarima_model["mape"]
+            model.mad = 0
+
+            model.save()
+
+        return redirect('ricePage')
+
     # SARIMA Part
     sarima_models = []
 
     for x in SARIMAModel.objects.all():
-        my_order = (x.p_param,x.d_param,x.q_param)
-        my_seasonal_order = (x.sp_param, x.sd_param, x.sq_param, x.m_param)
 
-        sarima_model = model_sarima(rice_data, "Rice", my_order, my_seasonal_order)
-
-        x.mse = sarima_model["mse"]
-        x.rmse = sarima_model["rmse"]
-        x.mape = sarima_model["mape"]
-        x.mad = 0
-
-        x.sarima_model.filename
-
-        x.save()
-
-        # x.update(mse = sarima_model["mse"])
-        # x.update(rmse = sarima_model["rmse"])
-        # x.update(mape = sarima_model["mape"])
-        # x.update(mad = 0)
-
-        # sarima_summary = {
-        #     'graph' : sarima_model["graph"],
-        #     'order' : my_order,
-        #     'seasonal_order' : my_seasonal_order,
-        #     'mse' : '{0:.2f}'.format(sarima_model["mse"]),
-        #     'rmse' : '{0:.4f}'.format(sarima_model["rmse"]),
-        #     'mape' : '{0:.4f}'.format(sarima_model["mape"]),
-        # }
+        # sarima_model = model_sarima(rice_data, "Rice", my_order, my_seasonal_order)
 
         sarima_models.append({
             'model' : x,
-            'graph' : sarima_model["graph"]
         })
+
+    # for x in SARIMAModel.objects.all():
+    #     my_order = (x.p_param,x.d_param,x.q_param)
+    #     my_seasonal_order = (x.sp_param, x.sd_param, x.sq_param, x.m_param)
+
+    #     sarima_model = model_sarima(rice_data, "Rice", my_order, my_seasonal_order)
+
+    #     x.mse = sarima_model["mse"]
+    #     x.rmse = sarima_model["rmse"]
+    #     x.mape = sarima_model["mape"]
+    #     x.mad = 0
+
+    #     x.graph = sarima_model["graph"]
+
+    #     x.save()
+
+    #     sarima_models.append({
+    #         'model' : x,
+    #     })
 
     # Bayesian ARMA Part
     bayesian_arma_models = []

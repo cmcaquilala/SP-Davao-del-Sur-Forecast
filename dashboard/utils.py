@@ -82,13 +82,13 @@ def model_sarima(df, dataset_name, my_order, my_seasonal_order):
 	plt.xticks(rotation=45)
 	plt.grid(True)
 
-	filename = "static/models/SARIMA({0})({1}){2}.png".format(str(my_order), str(my_seasonal_order),str((datetime.now() - datetime.utcfromtimestamp(0)).total_seconds() * 1000.0))
-	plt.savefig(filename, format = "png")
+	# filename = "static/models/SARIMA({0})({1}){2}.png".format(str(my_order), str(my_seasonal_order),str((datetime.now() - datetime.utcfromtimestamp(0)).total_seconds() * 1000.0))
+	# plt.savefig(filename, format = "png")
 	graph = get_graph()
 
 	return {
 		"graph" : graph,
-		"filename" : filename,
+		# "filename" : filename,
 		"model" : model,
 		"mse" : model_MSE,
 		"rmse" : model_RMSE,
