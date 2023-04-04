@@ -113,8 +113,12 @@ def model_bayesian(df, dataset_name, my_order):
 		#posterior
 		trace = pm.sample(1000, cores=2)
 
-	phi1_vals = trace.posterior.phi[0][:,0]
-	phi2_vals = trace.posterior.phi[0][:,1]
+	phi_vals = []
+	for i in range(trace.posterior.phi[0][0].size):
+		phi_vals.append(trace.posterior.phi[0][:,i])
+
+	# phi1_vals = trace.posterior.phi[0][:,0]
+	# phi2_vals = trace.posterior.phi[0][:,1]
 	sigma_vals = trace.posterior.sigma[0]
 
     # print(sigma_vals)
@@ -122,12 +126,21 @@ def model_bayesian(df, dataset_name, my_order):
 	for _ in range(num_samples):
 		curr_vals = list(train_set['Volume'].copy())
         
-		phi1_val = np.random.choice(phi1_vals)
-		phi2_val = np.random.choice(phi2_vals)
+		phi_val = []
+		for i in range(len(phi_vals)):
+			phi_val.append(np.random.choice(phi_vals[i]))
+
+		# phi1_val = np.random.choice(phi1_vals)
+		# phi2_val = np.random.choice(phi2_vals)
 		sigma_val = np.random.choice(sigma_vals)
         
+		# my_value = np.random.normal(0, sigma_val)
 		for _ in range(num_periods):
-			curr_vals.append(curr_vals[-1]*phi1_val + curr_vals[-2]*phi2_val + np.random.normal(0, sigma_val))
+			my_value = np.random.normal(0, sigma_val)
+			for i in range(len(phi_val)):
+				my_value += curr_vals[-i]*phi_val[i]
+			curr_vals.append(my_value)
+			# curr_vals.append(curr_vals[-1]*phi1_val + curr_vals[-2]*phi2_val + np.random.normal(0, sigma_val))
 		forecasted_vals.append(curr_vals[-num_periods:]) 
 	forecasted_vals = np.array(forecasted_vals)
 
