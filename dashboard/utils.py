@@ -88,8 +88,9 @@ def model_sarima(df, dataset_name, my_order, my_seasonal_order):
 
 	return {
 		"graph" : graph,
-		# "filename" : filename,
 		"model" : model,
+		"predictions" : predictions,
+		"test_set" : test_set,
 		"mse" : model_MSE,
 		"rmse" : model_RMSE,
 		"mape" : model_MAPE,
@@ -188,6 +189,8 @@ def model_bayesian(df, dataset_name, my_order):
 	return {
 		"graph" : graph,
 		# "model" : model,
+		"predictions" : predictions,
+		"test_set" : test_set,
 		"mse" : model_MSE,
 		"rmse" : model_RMSE,
 		"mape" : model_MAPE,

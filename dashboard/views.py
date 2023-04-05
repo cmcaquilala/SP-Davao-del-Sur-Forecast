@@ -57,6 +57,23 @@ def add_sarima(request, dataset):
             model.mape = sarima_model["mape"]
             model.mad = 0
 
+            forecasts = []
+            predictions = np.ndarray.tolist(sarima_model["predictions"].values)
+
+            for i in range(len(predictions)):
+                my_date = pd.to_datetime(sarima_model["test_set"]['Date'].values[i])
+                year = my_date.year
+                quarter = my_date.month // 4 + 1
+
+                value_dict = {
+                    'period' : "{0} Q{1}".format(year, quarter),
+                    'actual' : sarima_model["test_set"]['Volume'].values[i],
+                    'prediction' : predictions[i],
+                    'error' : sarima_model["test_set"]['Volume'].values[i] - predictions[i],
+                }
+                forecasts.append(value_dict)
+            
+            model.forecasts = forecasts
             model.save()
 
     return redirect('graphs_page', dataset)
@@ -109,6 +126,20 @@ def delete_bayesian(request, dataset, id):
     return redirect('graphs_page', dataset)
 
 def graphs_page(request, dataset):
+    # Load dataset
+    filename = "static/{0} data.csv".format(str.lower(dataset))  
+    with open(filename) as file:
+        reader = csv.reader(file)
+        readerlist = []
+        next(reader)
+        
+        for row in reader:
+            readerlist.append(row)
+
+    dataset_data = pd.DataFrame(readerlist, columns=['Date','Volume'])
+    dataset_data['Volume'] = pd.to_numeric(dataset_data['Volume'])
+    dataset_data['Date'] = pd.to_datetime(dataset_data['Date'])
+
     # Loads forms for modal
     sarima_form = SARIMA_add_form(request.POST)
     bayesian_form = Bayesian_ARMA_add_form(request.POST)
@@ -126,8 +157,6 @@ def graphs_page(request, dataset):
 
     for x in BayesianARMAModel.objects.filter(dataset=dataset):
         bayesian_arma_models.append(x)
-
-    # End of Bayesian ARMA
 
     context = {
         'dataset' : dataset,

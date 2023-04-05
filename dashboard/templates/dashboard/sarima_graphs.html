@@ -81,6 +81,9 @@
                     <a class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#editsarima{{model.id}}">Edit</a>
                 </div> -->
                 <div class="col-auto">
+                    <a class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#forecastssarima{{model.id}}">Forecasts</a>
+                </div>
+                <div class="col-auto">
                     <a class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deletesarima{{model.id}}">Delete</a>
                 </div>
             </div>
@@ -94,7 +97,57 @@
         </div>
 
     </div>
+
+    <!-- <div class="row">
+        a
+        {{model.forecasts}}
+        {% for item in model.forecasts %}
+        <p>{{item}}</p>
+        {% endfor %}
+    </div> -->
 <!-- End Model Display -->
+
+<!-- Forecasts -->
+<div class="modal modal-lg fade" id="forecastssarima{{model.id}}" aria-labelledby="forecastmodal" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Forecasts</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            
+            <div class="modal-body p-3">
+                
+                <table class="table">
+                    <thead>
+                        <th>Period</th>
+                        <th>Actual Value</th>
+                        <th>Forecast</th>
+                        <th>Error</th>
+                    </thead>
+                    <tbody>
+                        {% for item in model.forecasts %}
+                        <tr>
+                            <td>{{item.period}}</td>
+                            <td>{{item.actual}}</td>
+                            <td>{{item.prediction}}</td>
+                            <td>{{item.error}}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+
+            </div>
+            
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-dark" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+
+    </div>
+</div>
+<!-- End Forecasts -->
 
 <!-- Delete -->
 <div class="modal fade" id="deletesarima{{model.id}}" aria-labelledby="deletemodal" aria-hidden="true">

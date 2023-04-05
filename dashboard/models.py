@@ -14,7 +14,9 @@ class SARIMAModel(models.Model):
     mse = models.DecimalField(max_digits=20, decimal_places=4,default=0)
     mape = models.DecimalField(max_digits=20, decimal_places=4,default=0)
     mad = models.DecimalField(max_digits=20, decimal_places=4,default=0)
+    
     order = models.SmallIntegerField(validators=[MinValueValidator(0)],default=0)
+    forecasts = models.JSONField(null=True)
     graph = models.ImageField(null=True)
 
     def __str__(self):
@@ -29,8 +31,11 @@ class BayesianARMAModel(models.Model):
     mse = models.DecimalField(max_digits=20, decimal_places=4,default=0)
     mape = models.DecimalField(max_digits=20, decimal_places=4,default=0)
     mad = models.DecimalField(max_digits=20, decimal_places=4,default=0)
-    order = models.SmallIntegerField(validators=[MinValueValidator(0)],default=0)
+
+    order = models.SmallIntegerField(validators=[MinValueValidator(0)],default=0)    
+    forecasts = models.JSONField(null=True)
     graph = models.ImageField(null=True)
+
 
     def __str__(self):
         formatted = self.dataset + "Bayesian ARMA(" + str(self.p_param) + ',' + str(self.q_param) + ")" 
