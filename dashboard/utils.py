@@ -9,6 +9,7 @@ from statsmodels.graphics.tsaplots import plot_acf
 from statsmodels.tsa.statespace.sarimax import SARIMAX
 from statsmodels.tsa.holtwinters import ExponentialSmoothing
 from statsmodels.tsa.stattools import adfuller
+from scipy import stats, special
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -34,10 +35,10 @@ def get_plot(x,y):
 	graph = get_graph()
 	return graph
 
-def model_sarima(df, dataset_name, my_order, my_seasonal_order):
+def model_sarima(df, dataset_name, my_order, my_seasonal_order, is_box_cox, lmbda):
 
 	# Train-Test Split
-	train_set = df[1:132]
+	train_set = df[0:132]
 	test_set = df[132:]
 
 	# ACF / PCF Plot
@@ -45,21 +46,29 @@ def model_sarima(df, dataset_name, my_order, my_seasonal_order):
 	# plot_acf(train_set['Volume'],lags=60)
 
 	# Transformation
-	transf_df_data = train_set.copy()
+	if is_box_cox:
+		lmbda = stats.boxcox(train_set['Volume'])[1] if lmbda == 0 else lmbda
+		df_data = stats.boxcox(train_set['Volume'], lmbda=lmbda)
+		# df_data = stats.boxcox(train_set['Volume'])[0]
+	else:
+		df_data = train_set['Volume']
 
 	# transf_df_data['Volume'] = np.log(train_set['Volume'])
 	# transf_df_data['Volume'] = transf_df_data['Volume'].diff()
 	# transf_df_data = transf_df_data.drop(transf_df_data.index[0])
 
 	# Model Creation
-	model = SARIMAX(train_set['Volume'], order=my_order, seasonal_order=my_seasonal_order)
+	model = SARIMAX(df_data, order=my_order, seasonal_order=my_seasonal_order)
 	model_fit = model.fit()
 
 	# print(model_fit.summary())
 
 	# Test Set Fitting
 	predictions = model_fit.forecast(len(test_set))
+	if is_box_cox:
+		predictions = special.inv_boxcox(predictions, lmbda)
 	predictions = pd.Series(predictions, index=test_set.index)
+	# predictions = pd.Series(predictions, index=test_set.index)
 	# residuals = test_set['Volume'] - predictions
 
 	# Model Evaluation
@@ -94,10 +103,11 @@ def model_sarima(df, dataset_name, my_order, my_seasonal_order):
 		"mse" : model_MSE,
 		"rmse" : model_RMSE,
 		"mape" : model_MAPE,
+		"lmbda" : lmbda,
 	}
 
-def model_bayesian(df, dataset_name, my_order):
-	train_set = df[1:132]
+def model_bayesian(df, dataset_name, my_order, is_box_cox):
+	train_set = df[0:132]
 	test_set = df[132:]
 
 	num_samples = 10000
@@ -195,7 +205,7 @@ def model_bayesian(df, dataset_name, my_order):
 		"rmse" : model_RMSE,
 		"mape" : model_MAPE,
 	}
-	
+
 def get_MSE(actual, predictions):
 	total = 0
 

@@ -1,4 +1,5 @@
 {% load static %}
+{% load humanize %}
 {% load crispy_forms_tags %}
 <div class="row">
     <div class="col-auto">
@@ -23,22 +24,50 @@
 
                 <div class="modal-body p-3">
 
-                    <!-- <div>
-                        <span>
-                            <b>Order:</b> (
-                                {{ sarima_form.p_param | as_crispy_field }},
-                                {{ sarima_form.d_param | as_crispy_field }},
-                                {{ sarima_form.q_param | as_crispy_field }}
-                            )
-                            (
-                                {{ sarima_form.sp_param | as_crispy_field }},
-                                {{ sarima_form.sd_param | as_crispy_field }},
-                                {{ sarima_form.sq_param | as_crispy_field }}
-                            ) {{ sarima_form.m_param | as_crispy_field }}
-                        </span>
-                    </div> -->
+                    <div class="row">
+                        <div class="col-3">
+                            <b>Order:</b>
+                        </div>
+                        <div class="col-2">
+                            {{ sarima_form.p_param | as_crispy_field }}
+                        </div>
+                        <div class="col-2">
+                            {{ sarima_form.d_param | as_crispy_field }}
+                        </div>
+                        <div class="col-2">
+                            {{ sarima_form.q_param | as_crispy_field }}
+                        </div>
+                    </div>
 
-                    {{ sarima_form | crispy }}
+                    <div class="row">
+                        <div class="col-3">
+                            <b>Seasonal Order:</b>
+                        </div>
+                        <div class="col-2">
+                            {{ sarima_form.sp_param | as_crispy_field }}
+                        </div>
+                        <div class="col-2">
+                            {{ sarima_form.sd_param | as_crispy_field }}
+                        </div>
+                        <div class="col-2">
+                            {{ sarima_form.sq_param | as_crispy_field }}
+                        </div>
+                        <div class="col-2">
+                            {{ sarima_form.m_param | as_crispy_field }}
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <b class="mb-2">Transformation:</b>
+                        {{ sarima_form.is_boxcox | as_crispy_field }}
+                    </div>
+                    <div class="row">
+                        <div class="col-3">
+                            {{ sarima_form.lmbda | as_crispy_field }}
+                        </div>
+                    </div>
+
+                    <!-- {{ sarima_form | crispy }} -->
 
                 </div>
                 
@@ -90,10 +119,16 @@
             <hr>
             <p><b>Order (p,d,q):</b> ({{model.p_param}},{{model.d_param}},{{model.q_param}})</p>
             <p><b>Seasonal Order (P,D,Q)M:</b> ({{model.sp_param}},{{model.sd_param}},{{model.sq_param}})<sub>{{model.m_param}}</sub></h4></p>
+            <p><b>Box Cox: 
+                {{ model.is_boxcox | yesno:'Yes,No' }}
+            </b></p>
+            {% if model.is_boxcox %}
+            <p><b>Lambda:</b> {{model.lmbda | intcomma}}</p>
+            {% endif %}
 
-            <p><b>MSE:</b> {{model.mse}}</p>
-            <p><b>RMSE:</b> {{model.rmse}}</p>
-            <p><b>MAPE:</b> {{model.mape}} %</p>
+            <p><b>MSE:</b> {{model.mse | intcomma}}</p>
+            <p><b>RMSE:</b> {{model.rmse | intcomma}}</p>
+            <p><b>MAPE:</b> {{model.mape | intcomma}} %</p>
         </div>
 
     </div>
@@ -130,9 +165,9 @@
                         {% for item in model.forecasts %}
                         <tr>
                             <td>{{item.period}}</td>
-                            <td>{{item.actual}}</td>
-                            <td>{{item.prediction}}</td>
-                            <td>{{item.error}}</td>
+                            <td>{{item.actual | intcomma}}</td>
+                            <td>{{item.prediction | intcomma}}</td>
+                            <td>{{item.error | intcomma}}</td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -173,6 +208,8 @@
     </div>
 </div>
 <!-- End Delete -->
+
+<br>
 
 {% empty %}
 

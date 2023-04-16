@@ -14,14 +14,22 @@ class SARIMAModel(models.Model):
     mse = models.DecimalField(max_digits=20, decimal_places=4,default=0)
     mape = models.DecimalField(max_digits=20, decimal_places=4,default=0)
     mad = models.DecimalField(max_digits=20, decimal_places=4,default=0)
+    is_boxcox = models.BooleanField(default=False)
+    lmbda = models.DecimalField(max_digits=20, decimal_places=6, blank=True, null=True, default=0)
     
     order = models.SmallIntegerField(validators=[MinValueValidator(0)],default=0)
     forecasts = models.JSONField(null=True)
     graph = models.ImageField(null=True)
 
     def __str__(self):
-        formatted = self.dataset + " SARIMA(" + str(self.p_param) + ", " + str(self.d_param) + ", " + str(self.q_param) + ")(" +  str(self.sp_param) + ", " +  str(self.sd_param) + ", " +  str(self.sq_param) + ")" + str(self.m_param)
-        return formatted
+        order = self.dataset + " SARIMA(" + str(self.p_param) + ", " + str(self.d_param) + ", " + str(self.q_param) + ")"
+        seasonal = "(" +  str(self.sp_param) + ", " +  str(self.sd_param) + ", " +  str(self.sq_param) + ")" + str(self.m_param)
+        
+        addons = ""
+        addons += "BC " if self.is_boxcox else ""
+        addons += str(self.lmbda) if self.is_boxcox else ""
+
+        return order + seasonal + addons
 
 class BayesianARMAModel(models.Model):
     dataset = models.TextField(null=True)
@@ -31,6 +39,8 @@ class BayesianARMAModel(models.Model):
     mse = models.DecimalField(max_digits=20, decimal_places=4,default=0)
     mape = models.DecimalField(max_digits=20, decimal_places=4,default=0)
     mad = models.DecimalField(max_digits=20, decimal_places=4,default=0)
+    is_boxcox = models.BooleanField(default=False)
+    lmbda = models.DecimalField(max_digits=20, decimal_places=4,default=0)
 
     order = models.SmallIntegerField(validators=[MinValueValidator(0)],default=0)    
     forecasts = models.JSONField(null=True)

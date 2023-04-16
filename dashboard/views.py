@@ -47,8 +47,10 @@ def add_sarima(request, dataset):
 
             my_order = (int(request.POST["p_param"]),int(request.POST["d_param"]),int(request.POST["q_param"]))
             my_seasonal_order = (int(request.POST["sp_param"]), int(request.POST["sd_param"]), int(request.POST["sq_param"]), int(request.POST["m_param"]))
+            is_box_cox = request.POST["is_boxcox"]
+            lmbda = 0 if (request.POST["lmbda"] == "" or request.POST["lmbda"] == None) else float(request.POST["lmbda"])
 
-            sarima_model = model_sarima(dataset_data, dataset, my_order, my_seasonal_order)
+            sarima_model = model_sarima(dataset_data, dataset, my_order, my_seasonal_order, is_box_cox, lmbda)
 
             model.dataset = dataset
             model.graph = sarima_model["graph"]
@@ -56,6 +58,7 @@ def add_sarima(request, dataset):
             model.rmse = sarima_model["rmse"]
             model.mape = sarima_model["mape"]
             model.mad = 0
+            model.lmbda = sarima_model["lmbda"]
 
             forecasts = []
             predictions = np.ndarray.tolist(sarima_model["predictions"].values)
@@ -63,7 +66,7 @@ def add_sarima(request, dataset):
             for i in range(len(predictions)):
                 my_date = pd.to_datetime(sarima_model["test_set"]['Date'].values[i])
                 year = my_date.year
-                quarter = my_date.month // 4 + 1
+                quarter = my_date.month // 3 + 1
 
                 value_dict = {
                     'period' : "{0} Q{1}".format(year, quarter),
@@ -100,7 +103,9 @@ def add_bayesian(request, dataset):
             model = form.save(False)
 
             my_order = (int(request.POST["p_param"]),int(request.POST["q_param"]))
-            bayesian_arma_model = model_bayesian(dataset_data, dataset, my_order)
+            is_box_cox = False
+
+            bayesian_arma_model = model_bayesian(dataset_data, dataset, my_order, is_box_cox)
 
             model.dataset = dataset
             model.graph = bayesian_arma_model["graph"]
