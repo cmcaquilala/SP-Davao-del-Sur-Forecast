@@ -1,17 +1,43 @@
 {% extends 'dashboard/base.html' %}
 {% load static %}
 {% load crispy_forms_tags %}
+{% load humanize %}
 {% block title %}{{dataset}} Production{% endblock title %}
 
 
 {% block content %}
 <div class="container my-3 py-3">
 
-    <div>
-        <h1 class="fw-bold">{{dataset}} Dataset</h1>
-        <p>Using the {{dataset}} dataset of Davao del Sur from 1987 to 2022.</p>
-        <hr>
+    <div class="row align-items-center">
+
+        <div class="col-8">
+            {% if merged_graphs %}
+            
+            <img src="data:image/png;base64, {{merged_graphs|safe}}"
+            class="img-fluid">
+            
+            {% endif %}
+        </div>
+
+        <div class="col">
+            <div class="row align-items-center">
+                <div class="col-auto">
+                    <h1 class="fw-bold">{{dataset}} Dataset</h1>
+                </div>
+                <div class="col-auto">
+                    <div class="col-auto">
+                        <a class="btn btn-primary btn-lg" data-bs-toggle="modal" data-bs-target="#summary">Summary</a>
+                    </div>
+                </div>
+            </div>
+            
+            <p>Using the {{dataset}} dataset of Davao del Sur from 1987 to 2022.</p>
+        </div>
+
+        
     </div>
+        
+    <hr>
 
     {% include 'dashboard/sarima_graphs.html' %}
 
@@ -23,4 +49,52 @@
     {% endcomment %}
 
 </div>
+
+<!-- Summary Modal -->
+
+<div class="modal modal-lg fade" id="summary" aria-labelledby="summary" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Forecasts</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            
+            <div class="modal-body p-3">
+                
+                <table class="table">
+                    <thead>
+                        <th>Model</th>
+                        <th>MSE</th>
+                        <th>RMSE</th>
+                        <th>MAPE</th>
+                    </thead>
+                    <tbody>
+                        {% for model in sarima_models %}
+                        <tr>
+                            <td>{{model.get_shorthand_str}}<sub>{{model.m_param}}</sub>
+                                {% if model.is_boxcox %}
+                                <p class="my-0">BoxCox, Lambda = {{model.lmbda}}</p>
+                                {% endif %}
+                            </td>
+                            <td>{{model.mse | intcomma}}</td>
+                            <td>{{model.rmse | intcomma}}</td>
+                            <td>{{model.mape | intcomma}}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+
+            </div>
+            
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-dark" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- End Summary -->
 {% endblock content %}

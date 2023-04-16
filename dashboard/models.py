@@ -21,15 +21,25 @@ class SARIMAModel(models.Model):
     forecasts = models.JSONField(null=True)
     graph = models.ImageField(null=True)
 
+    def get_order_str(self):
+        return "(" + str(self.p_param) + ", " + str(self.d_param) + ", " + str(self.q_param) + ")"
+
+    def get_seasonal_str(self):
+        return "(" +  str(self.sp_param) + ", " +  str(self.sd_param) + ", " +  str(self.sq_param) + ")"
+
+    def get_shorthand_str(self):
+        shorthand = "SARIMA" + self.get_order_str() + self.get_seasonal_str()
+        return shorthand
+
     def __str__(self):
-        order = self.dataset + " SARIMA(" + str(self.p_param) + ", " + str(self.d_param) + ", " + str(self.q_param) + ")"
-        seasonal = "(" +  str(self.sp_param) + ", " +  str(self.sd_param) + ", " +  str(self.sq_param) + ")" + str(self.m_param)
+        order = self.get_order_str()
+        seasonal = self.get_seasonal_str() + str(self.m_param)
         
         addons = ""
         addons += "BC " if self.is_boxcox else ""
         addons += str(self.lmbda) if self.is_boxcox else ""
 
-        return order + seasonal + addons
+        return self.dataset + " SARIMA" + order + seasonal + addons
 
 class BayesianARMAModel(models.Model):
     dataset = models.TextField(null=True)

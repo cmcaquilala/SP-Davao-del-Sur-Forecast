@@ -18,6 +18,7 @@ import numpy as np
 import pandas as pd
 
 import datetime as DateTime
+from dateutil.relativedelta import relativedelta
 
 # Create your views here.
 def index_page(request):
@@ -47,7 +48,7 @@ def add_sarima(request, dataset):
 
             my_order = (int(request.POST["p_param"]),int(request.POST["d_param"]),int(request.POST["q_param"]))
             my_seasonal_order = (int(request.POST["sp_param"]), int(request.POST["sd_param"]), int(request.POST["sq_param"]), int(request.POST["m_param"]))
-            is_box_cox = request.POST["is_boxcox"]
+            is_box_cox = request.POST.get('is_boxcox', False)
             lmbda = 0 if (request.POST["lmbda"] == "" or request.POST["lmbda"] == None) else float(request.POST["lmbda"])
 
             sarima_model = model_sarima(dataset_data, dataset, my_order, my_seasonal_order, is_box_cox, lmbda)
@@ -62,17 +63,23 @@ def add_sarima(request, dataset):
 
             forecasts = []
             predictions = np.ndarray.tolist(sarima_model["predictions"].values)
+            out_of_sample = np.ndarray.tolist(sarima_model["forecasts"].values)
+            predictions += out_of_sample
 
+            curr_date = pd.to_datetime(sarima_model["test_set"]['Date'].values[0])
             for i in range(len(predictions)):
-                my_date = pd.to_datetime(sarima_model["test_set"]['Date'].values[i])
-                year = my_date.year
-                quarter = my_date.month // 3 + 1
+                curr_date += relativedelta(months=3)
+                year = curr_date.year
+                quarter = curr_date.month // 3 + 1
+
+                actual = sarima_model["test_set"]['Volume'].values[i] if i < len(sarima_model["test_set"]['Volume'].values) else 0
+                error = actual - predictions[i] if actual != 0 else 0
 
                 value_dict = {
                     'period' : "{0} Q{1}".format(year, quarter),
-                    'actual' : sarima_model["test_set"]['Volume'].values[i],
+                    'actual' : actual,
                     'prediction' : predictions[i],
-                    'error' : sarima_model["test_set"]['Volume'].values[i] - predictions[i],
+                    'error' : error,
                 }
                 forecasts.append(value_dict)
             
@@ -163,8 +170,14 @@ def graphs_page(request, dataset):
     for x in BayesianARMAModel.objects.filter(dataset=dataset):
         bayesian_arma_models.append(x)
 
+    # temporary date
+    test_set = dataset_data[132:]
+
+    merged_graphs = get_merged_graphs(sarima_models, bayesian_arma_models, test_set)
+
     context = {
         'dataset' : dataset,
+        'merged_graphs' : merged_graphs,
         'sarima_models' : sarima_models,
         'bayesian_arma_models' : bayesian_arma_models,
         'sarima_form' : sarima_form,
@@ -172,4 +185,3 @@ def graphs_page(request, dataset):
     }
 
     return render(request, 'dashboard/graph_page.html', context)
-

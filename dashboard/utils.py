@@ -35,6 +35,40 @@ def get_plot(x,y):
 	graph = get_graph()
 	return graph
 
+def get_merged_graphs(sarima_models, bayesian_arma_models, test_set):
+	if (len(sarima_models) + len(bayesian_arma_models) < 1):
+		return get_graph()
+
+	plt.figure(figsize=[15, 7.5]); # Set dimensions for figure
+	plot_title = 'Quarterly Predictions of Production Volume of Davao del Sur'
+	plt.title(plot_title)
+	plt.ylabel('Volume in Tons')
+	plt.xlabel('Date')
+	plt.xticks(rotation=45)
+	plt.grid(True)
+
+	plt.plot(test_set['Date'], test_set['Volume'],
+	  linewidth=4, label="Dataset")
+	plt.legend()
+    
+	date_start = test_set['Date'][test_set.index.start]
+
+	for model in sarima_models:
+		# predict_plot = pd.concat([predictions_df, forecasts_df], ignore_index=True)
+		no_of_periods = len(model.forecasts)
+		forecast_dates = pd.date_range(start=date_start, periods=no_of_periods, freq="QS")
+
+		predictions = []
+		for item in model.forecasts:
+			predictions.append(item['prediction'])
+
+		plt.plot(forecast_dates, predictions, label=model.get_shorthand_str())
+		plt.legend()
+
+
+	return get_graph()
+
+
 def model_sarima(df, dataset_name, my_order, my_seasonal_order, is_box_cox, lmbda):
 
 	# Train-Test Split
@@ -71,6 +105,22 @@ def model_sarima(df, dataset_name, my_order, my_seasonal_order, is_box_cox, lmbd
 	# predictions = pd.Series(predictions, index=test_set.index)
 	# residuals = test_set['Volume'] - predictions
 
+	predictions_df = pd.DataFrame(
+		{'Date': test_set['Date'],
+		'Volume': predictions})
+
+	# Forecasts
+	no_of_forecasts = 9
+	forecasts = model_fit.forecast(no_of_forecasts)
+	if is_box_cox:
+		forecasts = special.inv_boxcox(forecasts, lmbda)
+
+	forecast_dates = pd.date_range(test_set['Date'][test_set.index.stop-1], periods=no_of_forecasts, freq="QS")
+
+	forecasts_df = pd.DataFrame(
+		{'Date': forecast_dates,
+		'Volume': forecasts})
+
 	# Model Evaluation
 	model_MSE = get_MSE(test_set['Volume'].values,predictions.values)
 	model_RMSE = get_RMSE(test_set['Volume'].values,predictions.values)
@@ -79,11 +129,14 @@ def model_sarima(df, dataset_name, my_order, my_seasonal_order, is_box_cox, lmbd
 	# Graph Plotting
 	points_to_display = 100
 
+	predict_plot = pd.concat([predictions_df, forecasts_df], ignore_index=True)
+
 	plt.figure(figsize=[15, 7.5]); # Set dimensions for figure
 	# plt.xlim([points_to_display,df.size-points_to_display])
-	plt.xlim([df['Date'][0],df['Date'][df['Date'].size-1]])
+	# plt.xlim([df['Date'][0],df['Date'][df['Date'].size-1]])
 	plt.plot(df['Date'], df['Volume'])
-	plt.plot(test_set['Date'], predictions)
+	# plt.plot(test_set['Date'], predictions)
+	plt.plot(predict_plot['Date'], predict_plot['Volume'])
 	plot_title = 'Quarterly ' + dataset_name + ' Production Volume of Davao del Sur Using SARIMA' + str(my_order) + str(my_seasonal_order)
 	plt.title(plot_title)
 	plt.ylabel('Volume in Tons')
@@ -99,6 +152,7 @@ def model_sarima(df, dataset_name, my_order, my_seasonal_order, is_box_cox, lmbd
 		"graph" : graph,
 		"model" : model,
 		"predictions" : predictions,
+		"forecasts" : forecasts,
 		"test_set" : test_set,
 		"mse" : model_MSE,
 		"rmse" : model_RMSE,

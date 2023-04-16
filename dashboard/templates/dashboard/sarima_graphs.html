@@ -83,7 +83,7 @@
 
 {% for model in sarima_models %}
 <!-- Model Display -->
-    <div class="row">
+    <div class="row align-items-center">
         
         <div class="col-8">
             <!-- {% if model.graph %}
@@ -102,13 +102,10 @@
         </div>
 
         <div class="col">
-            <div class="row">
+            <div class="row gx-1">
                 <div class="col">
-                    <h4>SARIMA ({{model.p_param}},{{model.d_param}},{{model.q_param}})({{model.sp_param}},{{model.sd_param}},{{model.sq_param}})<sub>{{model.m_param}}</sub></h4>
+                    <h4>{{model.get_shorthand_str}}<sub>{{model.m_param}}</sub></h4>
                 </div>
-                <!-- <div class="col-auto">
-                    <a class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#editsarima{{model.id}}">Edit</a>
-                </div> -->
                 <div class="col-auto">
                     <a class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#forecastssarima{{model.id}}">Forecasts</a>
                 </div>
@@ -116,6 +113,17 @@
                     <a class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deletesarima{{model.id}}">Delete</a>
                 </div>
             </div>
+            {% if model.is_boxcox %}
+            <p>BoxCox, Lambda = {{model.lmbda}}</p>
+            {% endif %}
+            <!-- <div class="row">
+                <div class="col-auto">
+                    <a class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#forecastssarima{{model.id}}">Forecasts</a>
+                </div>
+                <div class="col-auto">
+                    <a class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deletesarima{{model.id}}">Delete</a>
+                </div>
+            </div> -->
             <hr>
             <p><b>Order (p,d,q):</b> ({{model.p_param}},{{model.d_param}},{{model.q_param}})</p>
             <p><b>Seasonal Order (P,D,Q)M:</b> ({{model.sp_param}},{{model.sd_param}},{{model.sq_param}})<sub>{{model.m_param}}</sub></h4></p>
@@ -164,10 +172,20 @@
                     <tbody>
                         {% for item in model.forecasts %}
                         <tr>
-                            <td>{{item.period}}</td>
-                            <td>{{item.actual | intcomma}}</td>
+                            <td>
+                                {{item.period}}
+                            </td>
+                            <td>
+                                {% if item.actual != 0 %}
+                                {{item.actual | intcomma}}
+                                {% endif %}
+                            </td>
                             <td>{{item.prediction | intcomma}}</td>
-                            <td>{{item.error | intcomma}}</td>
+                            <td>
+                                {% if item.actual != 0 %}
+                                {{item.error | intcomma}}
+                                {% endif %}
+                            </td>
                         </tr>
                         {% endfor %}
                     </tbody>
