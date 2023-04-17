@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django.contrib.humanize',
     'django_cleanup.apps.CleanupConfig',
+    'forecastingprototype',
     'dashboard',
     'crispy_forms',
     "crispy_bootstrap4",
