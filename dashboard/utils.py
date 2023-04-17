@@ -62,14 +62,16 @@ def get_merged_graphs(sarima_models, bayesian_arma_models, test_set):
 		for item in model.forecasts:
 			predictions.append(item['prediction'])
 
-		plt.plot(forecast_dates, predictions, label=model.get_shorthand_str())
+		plt.plot(forecast_dates, predictions,label="{0} {1}".format(
+			model.get_shorthand_str(),
+			"BC " + str(model.lmbda) if model.is_boxcox else ""))
 		plt.legend()
 
 
 	return get_graph()
 
 
-def model_sarima(df, dataset_name, my_order, my_seasonal_order, is_box_cox, lmbda):
+def model_sarima(df, dataset_name, my_order, my_seasonal_order, is_boxcox, lmbda):
 
 	# Train-Test Split
 	train_set = df[0:132]
@@ -80,7 +82,7 @@ def model_sarima(df, dataset_name, my_order, my_seasonal_order, is_box_cox, lmbd
 	# plot_acf(train_set['Volume'],lags=60)
 
 	# Transformation
-	if is_box_cox:
+	if is_boxcox:
 		lmbda = stats.boxcox(train_set['Volume'])[1] if lmbda == 0 else lmbda
 		df_data = stats.boxcox(train_set['Volume'], lmbda=lmbda)
 		# df_data = stats.boxcox(train_set['Volume'])[0]
@@ -99,7 +101,7 @@ def model_sarima(df, dataset_name, my_order, my_seasonal_order, is_box_cox, lmbd
 
 	# Test Set Fitting
 	predictions = model_fit.forecast(len(test_set))
-	if is_box_cox:
+	if is_boxcox:
 		predictions = special.inv_boxcox(predictions, lmbda)
 	predictions = pd.Series(predictions, index=test_set.index)
 	# predictions = pd.Series(predictions, index=test_set.index)
@@ -112,7 +114,7 @@ def model_sarima(df, dataset_name, my_order, my_seasonal_order, is_box_cox, lmbd
 	# Forecasts
 	no_of_forecasts = 9
 	forecasts = model_fit.forecast(no_of_forecasts)
-	if is_box_cox:
+	if is_boxcox:
 		forecasts = special.inv_boxcox(forecasts, lmbda)
 
 	forecast_dates = pd.date_range(test_set['Date'][test_set.index.stop-1], periods=no_of_forecasts, freq="QS")
@@ -146,6 +148,14 @@ def model_sarima(df, dataset_name, my_order, my_seasonal_order, is_box_cox, lmbd
 
 	# filename = "static/models/SARIMA({0})({1}){2}.png".format(str(my_order), str(my_seasonal_order),str((datetime.now() - datetime.utcfromtimestamp(0)).total_seconds() * 1000.0))
 	# plt.savefig(filename, format = "png")
+	filename = "static/models/{0} {1}{2}{3} {4}.png".format(
+		dataset_name,
+		"SARIMA",
+		my_order,
+		my_seasonal_order,
+		"BC" + str(lmbda) if is_boxcox else "",
+	)
+	plt.savefig(filename, format = "png")
 	graph = get_graph()
 
 	return {

@@ -22,10 +22,10 @@ class SARIMAModel(models.Model):
     graph = models.ImageField(null=True)
 
     def get_order_str(self):
-        return "(" + str(self.p_param) + ", " + str(self.d_param) + ", " + str(self.q_param) + ")"
+        return "(" + str(self.p_param) + "," + str(self.d_param) + "," + str(self.q_param) + ")"
 
     def get_seasonal_str(self):
-        return "(" +  str(self.sp_param) + ", " +  str(self.sd_param) + ", " +  str(self.sq_param) + ")"
+        return "(" +  str(self.sp_param) + "," +  str(self.sd_param) + "," +  str(self.sq_param) + ")"
 
     def get_shorthand_str(self):
         shorthand = "SARIMA" + self.get_order_str() + self.get_seasonal_str()

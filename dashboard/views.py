@@ -48,10 +48,10 @@ def add_sarima(request, dataset):
 
             my_order = (int(request.POST["p_param"]),int(request.POST["d_param"]),int(request.POST["q_param"]))
             my_seasonal_order = (int(request.POST["sp_param"]), int(request.POST["sd_param"]), int(request.POST["sq_param"]), int(request.POST["m_param"]))
-            is_box_cox = request.POST.get('is_boxcox', False)
+            is_boxcox = request.POST.get('is_boxcox', False)
             lmbda = 0 if (request.POST["lmbda"] == "" or request.POST["lmbda"] == None) else float(request.POST["lmbda"])
 
-            sarima_model = model_sarima(dataset_data, dataset, my_order, my_seasonal_order, is_box_cox, lmbda)
+            sarima_model = model_sarima(dataset_data, dataset, my_order, my_seasonal_order, is_boxcox, lmbda)
 
             model.dataset = dataset
             model.graph = sarima_model["graph"]
@@ -63,7 +63,10 @@ def add_sarima(request, dataset):
 
             forecasts = []
             predictions = np.ndarray.tolist(sarima_model["predictions"].values)
-            out_of_sample = np.ndarray.tolist(sarima_model["forecasts"])
+            if is_boxcox:
+                out_of_sample = np.ndarray.tolist(sarima_model["forecasts"])
+            else:
+                out_of_sample = np.ndarray.tolist(sarima_model["forecasts"].values)
             predictions += out_of_sample
 
             curr_date = pd.to_datetime(sarima_model["test_set"]['Date'].values[0])
@@ -110,9 +113,9 @@ def add_bayesian(request, dataset):
             model = form.save(False)
 
             my_order = (int(request.POST["p_param"]),int(request.POST["q_param"]))
-            is_box_cox = False
+            is_boxcox = False
 
-            bayesian_arma_model = model_bayesian(dataset_data, dataset, my_order, is_box_cox)
+            bayesian_arma_model = model_bayesian(dataset_data, dataset, my_order, is_boxcox)
 
             model.dataset = dataset
             model.graph = bayesian_arma_model["graph"]
