@@ -36,9 +36,6 @@ def get_plot(x,y):
 	return graph
 
 def get_merged_graphs(sarima_models, bayesian_arma_models, test_set):
-	if (len(sarima_models) + len(bayesian_arma_models) < 1):
-		return get_graph()
-
 	plt.figure(figsize=[15, 7.5]); # Set dimensions for figure
 	plot_title = 'Quarterly Predictions of Production Volume of Davao del Sur'
 	plt.title(plot_title)
@@ -52,6 +49,9 @@ def get_merged_graphs(sarima_models, bayesian_arma_models, test_set):
 	plt.legend()
     
 	date_start = test_set['Date'][test_set.index.start]
+
+	if (len(sarima_models) + len(bayesian_arma_models) < 1):
+		return get_graph()
 
 	for model in sarima_models:
 		# predict_plot = pd.concat([predictions_df, forecasts_df], ignore_index=True)

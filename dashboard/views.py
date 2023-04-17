@@ -63,7 +63,7 @@ def add_sarima(request, dataset):
 
             forecasts = []
             predictions = np.ndarray.tolist(sarima_model["predictions"].values)
-            out_of_sample = np.ndarray.tolist(sarima_model["forecasts"].values)
+            out_of_sample = np.ndarray.tolist(sarima_model["forecasts"])
             predictions += out_of_sample
 
             curr_date = pd.to_datetime(sarima_model["test_set"]['Date'].values[0])
