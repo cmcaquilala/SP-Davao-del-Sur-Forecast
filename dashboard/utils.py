@@ -67,7 +67,6 @@ def get_merged_graphs(sarima_models, bayesian_arma_models, test_set):
 			"BC " + str(model.lmbda) if model.is_boxcox else ""))
 		plt.legend()
 
-
 	return get_graph()
 
 
@@ -148,18 +147,19 @@ def model_sarima(df, dataset_name, my_order, my_seasonal_order, is_boxcox, lmbda
 
 	# filename = "static/models/SARIMA({0})({1}){2}.png".format(str(my_order), str(my_seasonal_order),str((datetime.now() - datetime.utcfromtimestamp(0)).total_seconds() * 1000.0))
 	# plt.savefig(filename, format = "png")
-	filename = "static/models/{0} {1}{2}{3} {4}.png".format(
+	filename = "models/{0} {1}{2}{3} {4}.png".format(
 		dataset_name,
 		"SARIMA",
 		my_order,
 		my_seasonal_order,
 		"BC" + str(lmbda) if is_boxcox else "",
 	)
-	plt.savefig(filename, format = "png")
+	plt.savefig("static/images/" + filename, format = "png")
 	graph = get_graph()
 
 	return {
 		"graph" : graph,
+		"filename" : filename,
 		"model" : model,
 		"predictions" : predictions,
 		"forecasts" : forecasts,

@@ -54,7 +54,8 @@ def add_sarima(request, dataset):
             sarima_model = model_sarima(dataset_data, dataset, my_order, my_seasonal_order, is_boxcox, lmbda)
 
             model.dataset = dataset
-            model.graph = sarima_model["graph"]
+            # model.graph = sarima_model["graph"]
+            model.graph = sarima_model["filename"]
             model.mse = sarima_model["mse"]
             model.rmse = sarima_model["rmse"]
             model.mape = sarima_model["mape"]
