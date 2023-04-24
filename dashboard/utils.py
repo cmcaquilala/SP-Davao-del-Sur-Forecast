@@ -123,6 +123,7 @@ def model_sarima(df, dataset_name, my_order, my_seasonal_order, is_boxcox, lmbda
 		'Volume': forecasts})
 
 	# Model Evaluation
+	model_BIC = model_fit.bic
 	model_MSE = get_MSE(test_set['Volume'].values,predictions.values)
 	model_RMSE = get_RMSE(test_set['Volume'].values,predictions.values)
 	model_MAPE = get_MAPE(test_set['Volume'].values,predictions.values)
@@ -147,12 +148,13 @@ def model_sarima(df, dataset_name, my_order, my_seasonal_order, is_boxcox, lmbda
 
 	# filename = "static/models/SARIMA({0})({1}){2}.png".format(str(my_order), str(my_seasonal_order),str((datetime.now() - datetime.utcfromtimestamp(0)).total_seconds() * 1000.0))
 	# plt.savefig(filename, format = "png")
-	filename = "models/{0} {1}{2}{3} {4}.png".format(
+	filename = "models/{0} {1}{2}{3} {4} {5}.png".format(
 		dataset_name,
 		"SARIMA",
 		my_order,
 		my_seasonal_order,
 		"BC" + str(lmbda) if is_boxcox else "",
+		get_timestamp(),
 	)
 	plt.savefig("static/images/" + filename, format = "png")
 	graph = get_graph()
@@ -161,9 +163,11 @@ def model_sarima(df, dataset_name, my_order, my_seasonal_order, is_boxcox, lmbda
 		"graph" : graph,
 		"filename" : filename,
 		"model" : model,
+		"model_fit" : model_fit,
 		"predictions" : predictions,
 		"forecasts" : forecasts,
 		"test_set" : test_set,
+		"bic" : model_BIC,
 		"mse" : model_MSE,
 		"rmse" : model_RMSE,
 		"mape" : model_MAPE,
@@ -276,7 +280,7 @@ def get_MSE(actual, predictions):
 	for i in range(actual.size):
 		total += (actual[i] - predictions[i])**2
 
-	return total / (actual.size - 1)
+	return total / (actual.size)
 
 def get_RMSE(actual, predictions):
 	total = 0
@@ -293,3 +297,6 @@ def get_MAPE(actual, predictions):
 		total += math.fabs((actual[i] - predictions[i]) / actual[i])
 
 	return (total / (actual.size)) * 100
+
+def get_timestamp():
+	return str((datetime.now() - datetime.utcfromtimestamp(0)).total_seconds() * 1000.0)

@@ -56,6 +56,7 @@ def add_sarima(request, dataset):
             model.dataset = dataset
             # model.graph = sarima_model["graph"]
             model.graph = sarima_model["filename"]
+            model.bic = sarima_model["bic"]
             model.mse = sarima_model["mse"]
             model.rmse = sarima_model["rmse"]
             model.mape = sarima_model["mape"]
@@ -72,7 +73,6 @@ def add_sarima(request, dataset):
 
             curr_date = pd.to_datetime(sarima_model["test_set"]['Date'].values[0])
             for i in range(len(predictions)):
-                curr_date += relativedelta(months=3)
                 year = curr_date.year
                 quarter = curr_date.month // 3 + 1
 
@@ -86,6 +86,7 @@ def add_sarima(request, dataset):
                     'error' : error,
                 }
                 forecasts.append(value_dict)
+                curr_date += relativedelta(months=3)
             
             model.forecasts = forecasts
             model.save()

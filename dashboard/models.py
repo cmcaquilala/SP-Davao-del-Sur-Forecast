@@ -10,6 +10,7 @@ class SARIMAModel(models.Model):
     sd_param = models.SmallIntegerField(validators=[MinValueValidator(0)])
     sq_param = models.SmallIntegerField(validators=[MinValueValidator(0)])
     m_param = models.SmallIntegerField(validators=[MinValueValidator(0)])
+    bic = models.DecimalField(max_digits=20, decimal_places=4,default=0)
     rmse = models.DecimalField(max_digits=20, decimal_places=4,default=0)
     mse = models.DecimalField(max_digits=20, decimal_places=4,default=0)
     mape = models.DecimalField(max_digits=20, decimal_places=4,default=0)
