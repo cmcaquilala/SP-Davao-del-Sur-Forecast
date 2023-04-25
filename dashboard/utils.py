@@ -20,6 +20,22 @@ import pymc as pm
 import seaborn as sns
 # from statsmodels.tsa.arima_model import ARIMA
 
+# Using rpy
+import rpy2
+import rpy2.robjects as robjects
+from rpy2.robjects.packages import importr, data
+
+r_base = importr('base')
+r_utils = importr('utils')
+r_generics = importr('generics')
+
+r_utils.chooseCRANmirror(ind=1)
+r_utils.install_packages('stats')
+r_utils.install_packages('forecast')
+
+r_stats = importr('stats')
+r_forecast = importr('forecast')
+
 def get_graph():
 	buffer = BytesIO()
 	plt.savefig(buffer, format='png')
@@ -70,75 +86,95 @@ def get_merged_graphs(sarima_models, bayesian_arma_models, test_set):
 	return get_graph()
 
 
-def model_sarima(df, dataset_name, my_order, my_seasonal_order, is_boxcox, lmbda):
+def model_sarima(filename, dataset_data, dataset_name, my_order, my_seasonal_order, is_boxcox, lmbda):
 
-	# Train-Test Split
-	train_set = df[0:132]
-	test_set = df[132:]
+	# Initialization
+	no_of_forecasts = 12
+	train_set_size = 132
 
-	# ACF / PCF Plot
-	# plot_pacf(train_set['Volume'],lags=60)
-	# plot_acf(train_set['Volume'],lags=60)
+	train_set = dataset_data[0:train_set_size]
+	test_set = dataset_data[train_set_size:]
 
-	# Transformation
-	if is_boxcox:
-		lmbda = stats.boxcox(train_set['Volume'])[1] if lmbda == 0 else lmbda
-		df_data = stats.boxcox(train_set['Volume'], lmbda=lmbda)
-		# df_data = stats.boxcox(train_set['Volume'])[0]
+	# ----------------------
+	# Using rpy2:
+	# Convert inputs
+	r_order = robjects.FloatVector([my_order[0],my_order[1],my_order[2]])
+	r_seasonal_order = robjects.FloatVector([my_seasonal_order[0],my_seasonal_order[1],my_seasonal_order[2]])
+	r_null = robjects.r['as.null']()
+
+	# import data
+	r_dataset_data = r_utils.read_csv(filename)
+	r_dataset_data_ts = r_stats.ts(data = r_dataset_data[1], frequency = 4, start = [1987,1])
+
+	# train-test split
+	r_train_set = r_stats.ts(r_dataset_data_ts[0:train_set_size], frequency = 4, start = [1987,1])
+	r_test_set = r_stats.ts(r_dataset_data_ts[train_set_size:len(r_dataset_data_ts)], frequency = 4, start = [2020,1])
+
+	# get boxcox lambda
+	if is_boxcox and lmbda == 0:
+		r_lambda = r_forecast.BoxCox_lambda(r_train_set)
+		lmbda = r_lambda[0]
+	elif is_boxcox:
+		r_lambda = lmbda
 	else:
-		df_data = train_set['Volume']
+		r_lambda = r_null
 
-	# transf_df_data['Volume'] = np.log(train_set['Volume'])
-	# transf_df_data['Volume'] = transf_df_data['Volume'].diff()
-	# transf_df_data = transf_df_data.drop(transf_df_data.index[0])
+	# # create model
+	r_model = r_forecast.Arima(r_train_set, r_order, r_seasonal_order, r_null, True, False, False, r_lambda)
 
-	# Model Creation
-	model = SARIMAX(df_data, order=my_order, seasonal_order=my_seasonal_order)
-	model_fit = model.fit()
+	# fitting w/ test set
+	# r_predictions = r_stats.ts(r_test_set,start = [2020,1],frequency = 4)
 
-	# print(model_fit.summary())
+	# creating one-step-ahead values
+	r_new_model = r_forecast.Arima(r_dataset_data_ts, r_order, r_seasonal_order, r_null, True, False, False,
+								r_lambda, False, "CSS-ML", r_model)
+	r_one_step_forecasts = r_stats.fitted(r_new_model)[len(r_train_set):len(r_dataset_data_ts)]
 
-	# Test Set Fitting
-	predictions = model_fit.forecast(len(test_set))
-	if is_boxcox:
-		predictions = special.inv_boxcox(predictions, lmbda)
-	predictions = pd.Series(predictions, index=test_set.index)
-	# predictions = pd.Series(predictions, index=test_set.index)
-	# residuals = test_set['Volume'] - predictions
+	# metrics
+	r_metrics = r_generics.accuracy(r_one_step_forecasts,r_test_set)
 
+	# forecasts
+	r_forecasts = r_generics.forecast(r_dataset_data_ts,model=r_model,h=no_of_forecasts)
+
+	# End of rpy2
+	# ----------------------
+
+
+	# Model Evaluation
+	model_MSE = r_metrics[1]*r_metrics[1]
+	model_RMSE = r_metrics[1]
+	model_MAPE = r_metrics[4]
+	model_BIC = r_model[15][0]
+	# model_aic = r_model[5][0]
+	# model_aicc = r_model[14][0]
+
+	# # Graph Plotting
+	# points_to_display = 100
+
+	predictions = []
+	forecasts = []
+
+	for x in r_one_step_forecasts:
+		predictions.append(x)
+
+	for x in r_forecasts[3]:
+		forecasts.append(x)
+
+	forecast_dates = pd.date_range(test_set['Date'][test_set.index.stop-1], periods=no_of_forecasts, freq="QS")
 	predictions_df = pd.DataFrame(
 		{'Date': test_set['Date'],
 		'Volume': predictions})
-
-	# Forecasts
-	no_of_forecasts = 9
-	forecasts = model_fit.forecast(no_of_forecasts)
-	if is_boxcox:
-		forecasts = special.inv_boxcox(forecasts, lmbda)
-
-	forecast_dates = pd.date_range(test_set['Date'][test_set.index.stop-1], periods=no_of_forecasts, freq="QS")
-
 	forecasts_df = pd.DataFrame(
 		{'Date': forecast_dates,
 		'Volume': forecasts})
 
-	# Model Evaluation
-	model_BIC = model_fit.bic
-	model_MSE = get_MSE(test_set['Volume'].values,predictions.values)
-	model_RMSE = get_RMSE(test_set['Volume'].values,predictions.values)
-	model_MAPE = get_MAPE(test_set['Volume'].values,predictions.values)
-
-	# Graph Plotting
-	points_to_display = 100
-
 	predict_plot = pd.concat([predictions_df, forecasts_df], ignore_index=True)
 
+	# Plotting
 	plt.figure(figsize=[15, 7.5]); # Set dimensions for figure
-	# plt.xlim([points_to_display,df.size-points_to_display])
-	# plt.xlim([df['Date'][0],df['Date'][df['Date'].size-1]])
-	plt.plot(df['Date'], df['Volume'])
-	# plt.plot(test_set['Date'], predictions)
+	plt.plot(dataset_data['Date'], dataset_data['Volume'])
 	plt.plot(predict_plot['Date'], predict_plot['Volume'])
+	# plt.plot(test_set['Date'], predictions)
 	plot_title = 'Quarterly ' + dataset_name + ' Production Volume of Davao del Sur Using SARIMA' + str(my_order) + str(my_seasonal_order)
 	plt.title(plot_title)
 	plt.ylabel('Volume in Tons')
@@ -146,8 +182,6 @@ def model_sarima(df, dataset_name, my_order, my_seasonal_order, is_boxcox, lmbda
 	plt.xticks(rotation=45)
 	plt.grid(True)
 
-	# filename = "static/models/SARIMA({0})({1}){2}.png".format(str(my_order), str(my_seasonal_order),str((datetime.now() - datetime.utcfromtimestamp(0)).total_seconds() * 1000.0))
-	# plt.savefig(filename, format = "png")
 	filename = "models/{0} {1}{2}{3} {4} {5}.png".format(
 		dataset_name,
 		"SARIMA",
@@ -162,8 +196,6 @@ def model_sarima(df, dataset_name, my_order, my_seasonal_order, is_boxcox, lmbda
 	return {
 		"graph" : graph,
 		"filename" : filename,
-		"model" : model,
-		"model_fit" : model_fit,
 		"predictions" : predictions,
 		"forecasts" : forecasts,
 		"test_set" : test_set,

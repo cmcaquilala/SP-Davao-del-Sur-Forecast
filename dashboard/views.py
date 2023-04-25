@@ -51,7 +51,7 @@ def add_sarima(request, dataset):
             is_boxcox = request.POST.get('is_boxcox', False)
             lmbda = 0 if (request.POST["lmbda"] == "" or request.POST["lmbda"] == None) else float(request.POST["lmbda"])
 
-            sarima_model = model_sarima(dataset_data, dataset, my_order, my_seasonal_order, is_boxcox, lmbda)
+            sarima_model = model_sarima(filename, dataset_data, dataset, my_order, my_seasonal_order, is_boxcox, lmbda)
 
             model.dataset = dataset
             # model.graph = sarima_model["graph"]
@@ -63,32 +63,27 @@ def add_sarima(request, dataset):
             model.mad = 0
             model.lmbda = sarima_model["lmbda"]
 
-            forecasts = []
-            predictions = np.ndarray.tolist(sarima_model["predictions"].values)
-            if is_boxcox:
-                out_of_sample = np.ndarray.tolist(sarima_model["forecasts"])
-            else:
-                out_of_sample = np.ndarray.tolist(sarima_model["forecasts"].values)
-            predictions += out_of_sample
+            model_forecasts = []
+            model_predictions = sarima_model["predictions"] + sarima_model["forecasts"]
 
             curr_date = pd.to_datetime(sarima_model["test_set"]['Date'].values[0])
-            for i in range(len(predictions)):
+            for i in range(len(model_predictions)):
                 year = curr_date.year
                 quarter = curr_date.month // 3 + 1
 
                 actual = sarima_model["test_set"]['Volume'].values[i] if i < len(sarima_model["test_set"]['Volume'].values) else 0
-                error = actual - predictions[i] if actual != 0 else 0
+                error = actual - model_predictions[i] if actual != 0 else 0
 
                 value_dict = {
                     'period' : "{0} Q{1}".format(year, quarter),
                     'actual' : actual,
-                    'prediction' : predictions[i],
+                    'prediction' : model_predictions[i],
                     'error' : error,
                 }
-                forecasts.append(value_dict)
+                model_forecasts.append(value_dict)
                 curr_date += relativedelta(months=3)
             
-            model.forecasts = forecasts
+            model.forecasts = model_forecasts
             model.save()
 
     return redirect('graphs_page', dataset)
