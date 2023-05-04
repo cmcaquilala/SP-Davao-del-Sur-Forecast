@@ -66,6 +66,7 @@
                 <table class="table">
                     <thead>
                         <th>Model</th>
+                        <th>BIC</th>
                         <th>MSE</th>
                         <th>RMSE</th>
                         <th>MAPE</th>
@@ -78,6 +79,7 @@
                                 <p class="my-0">BoxCox, Lambda = {{model.lmbda}}</p>
                                 {% endif %}
                             </td>
+                            <td>{{model.bic | intcomma}}</td>
                             <td>{{model.mse | intcomma}}</td>
                             <td>{{model.rmse | intcomma}}</td>
                             <td>{{model.mape | intcomma}}</td>
