@@ -5,12 +5,10 @@ import math
 from .utils import *
 
 # stat-related
-from statsmodels.graphics.tsaplots import plot_pacf
-from statsmodels.graphics.tsaplots import plot_acf
-from statsmodels.tsa.statespace.sarimax import SARIMAX
-from statsmodels.tsa.holtwinters import ExponentialSmoothing
-from statsmodels.tsa.stattools import adfuller
-from scipy import stats, special
+# from statsmodels.graphics.tsaplots import plot_pacf
+# from statsmodels.graphics.tsaplots import plot_acf
+# from statsmodels.tsa.stattools import adfuller
+# from scipy import stats, special
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd

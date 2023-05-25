@@ -51,11 +51,10 @@ def graphs_page(request, dataset):
     # Loads forms for modal
     sarima_form = SARIMA_add_form(request.POST)
     bayesian_form = BayesianARMA_add_form(request.POST)
+    winters_form = HoltWinters_add_form(request.POST)
 
     # SARIMA Part
     sarima_models = []
-
-    k = SARIMAModel.objects.filter(dataset=dataset)
 
     for x in SARIMAModel.objects.filter(dataset=dataset):
         sarima_models.append(x)
@@ -66,18 +65,26 @@ def graphs_page(request, dataset):
     for x in BayesianARMAModel.objects.filter(dataset=dataset):
         bayesian_arma_models.append(x)
 
+    # Holt-Winters Part
+    winters_models = []
+
+    for x in HoltWintersModel.objects.filter(dataset=dataset):
+        winters_models.append(x)
+
     # temporary date
     test_set = dataset_data[132:]
 
-    merged_graphs = get_merged_graphs(sarima_models, bayesian_arma_models, test_set)
+    merged_graphs = get_merged_graphs(sarima_models, bayesian_arma_models, winters_models, test_set)
 
     context = {
         'dataset' : dataset,
         'merged_graphs' : merged_graphs,
         'sarima_models' : sarima_models,
+        'winters_models' : winters_models,
         'bayesian_arma_models' : bayesian_arma_models,
         'sarima_form' : sarima_form,
         'bayesian_form' : bayesian_form,
+        'winters_form' : winters_form,
     }
 
     return render(request, 'dashboard/graph_page.html', context)

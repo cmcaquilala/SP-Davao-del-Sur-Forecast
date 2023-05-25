@@ -32,7 +32,7 @@ class BayesianARMA_add_form(ModelForm):
 class HoltWinters_add_form(ModelForm):
 
     class Meta:
-        model = BayesianARMAModel
+        model = HoltWintersModel
         fields = ['is_boxcox','lmbda']
         labels = {
             'is_boxcox' : 'Use Box Cox Transformation',

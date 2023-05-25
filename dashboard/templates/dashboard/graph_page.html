@@ -46,6 +46,11 @@
 
     {% include 'dashboard/bayesian_arma_graphs.html' %}
 
+    <br>
+    <hr>
+
+    {% include 'dashboard/winters_graphs.html' %}
+
 </div>
 
 <!-- Summary Modal -->
@@ -78,6 +83,32 @@
                                 {% endif %}
                             </td>
                             <td>{{model.bic | intcomma}}</td>
+                            <td>{{model.mse | intcomma}}</td>
+                            <td>{{model.rmse | intcomma}}</td>
+                            <td>{{model.mape | intcomma}}</td>
+                        </tr>
+                        {% endfor %}
+                        {% for model in bayesian_arma_models %}
+                        <tr>
+                            <td>{{model.get_shorthand_str}}<sub>{{model.m_param}}</sub>
+                                {% if model.is_boxcox %}
+                                <p class="my-0">BoxCox, Lambda = {{model.lmbda}}</p>
+                                {% endif %}
+                            </td>
+                            <td>{{model.bic | intcomma}}</td>
+                            <td>{{model.mse | intcomma}}</td>
+                            <td>{{model.rmse | intcomma}}</td>
+                            <td>{{model.mape | intcomma}}</td>
+                        </tr>
+                        {% endfor %}
+                        {% for model in winters_models %}
+                        <tr>
+                            <td>{{model}}
+                                {% if model.is_boxcox %}
+                                <p class="my-0">BoxCox, Lambda = {{model.lmbda}}</p>
+                                {% endif %}
+                            </td>
+                            <td>--</td>
                             <td>{{model.mse | intcomma}}</td>
                             <td>{{model.rmse | intcomma}}</td>
                             <td>{{model.mape | intcomma}}</td>

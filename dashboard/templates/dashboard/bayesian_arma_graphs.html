@@ -1,4 +1,5 @@
 {% load static %}
+{% load humanize %}
 {% load crispy_forms_tags %}
 <div class="row">
     <div class="col-auto">
@@ -47,7 +48,7 @@
 
 {% for model in bayesian_arma_models %}
 <!-- Model Display -->
-    <div class="row">
+    <div class="row align-items-center">
         
         <div class="col-8">
             <!-- {% if model.graph %}
@@ -59,13 +60,24 @@
 
             {% if model.graph %}
         
-            <img src="data:image/png;base64, {{model.graph|safe}}"
-                class="img-fluid">
+            <img src="static/images/{{model.graph}}" class="img-fluid">
     
             {% endif %}
         </div>
 
         <div class="col">
+            <div class="row gx-1">
+                <div class="col">
+                    <h4>{{model.get_shorthand_str}}<sub>{{model.m_param}}</sub></h4>
+                </div>
+                <div class="col-auto">
+                    <a class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#forecastssarima{{model.id}}">Forecasts</a>
+                </div>
+                <div class="col-auto">
+                    <a class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deletesarima{{model.id}}">Delete</a>
+                </div>
+            </div>
+
             <div class="row">
                 <div class="col">
                     <h4>Bayesian ARMA({{model.p_param}},{{model.q_param}})</h4>
