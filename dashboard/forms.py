@@ -19,12 +19,32 @@ class SARIMA_add_form(ModelForm):
             'lmbda' : 'Lambda (default: auto)',
         }
         
-class Bayesian_ARMA_add_form(ModelForm):
+class BayesianARMA_add_form(ModelForm):
 
     class Meta:
         model = BayesianARMAModel
-        fields = ['p_param','q_param']
+        fields = ['is_boxcox','lmbda']
         labels = {
             'p_param' : 'P',
             'q_param' : 'Q',
+        }
+
+class HoltWinters_add_form(ModelForm):
+
+    class Meta:
+        model = BayesianARMAModel
+        fields = ['is_boxcox','lmbda']
+        labels = {
+            'is_boxcox' : 'Use Box Cox Transformation',
+            'lmbda' : 'Lambda (default: auto)',
+        }
+
+class LSTM_add_form(ModelForm):
+
+    class Meta:
+        model = BayesianARMAModel
+        fields = ['is_boxcox','lmbda']
+        labels = {
+            'is_boxcox' : 'Use Box Cox Transformation',
+            'lmbda' : 'Lambda (default: auto)',
         }

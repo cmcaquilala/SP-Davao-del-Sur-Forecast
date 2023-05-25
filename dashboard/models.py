@@ -57,7 +57,38 @@ class BayesianARMAModel(models.Model):
     forecasts = models.JSONField(null=True)
     graph = models.ImageField(null=True)
 
-
     def __str__(self):
         formatted = self.dataset + "Bayesian ARMA(" + str(self.p_param) + ',' + str(self.q_param) + ")" 
+        return formatted
+    
+class HoltWintersModel(models.Model):
+    dataset = models.TextField(null=True)
+    rmse = models.DecimalField(max_digits=20, decimal_places=4,default=0)
+    mse = models.DecimalField(max_digits=20, decimal_places=4,default=0)
+    mape = models.DecimalField(max_digits=20, decimal_places=4,default=0)
+    mad = models.DecimalField(max_digits=20, decimal_places=4,default=0)
+    is_boxcox = models.BooleanField(default=False)
+    lmbda = models.DecimalField(max_digits=20, decimal_places=4,default=0)
+
+    forecasts = models.JSONField(null=True)
+    graph = models.ImageField(null=True)
+
+    def __str__(self):
+        formatted = self.dataset + "Holt-Winters Model" 
+        return formatted
+    
+class LSTMModel(models.Model):
+    dataset = models.TextField(null=True)
+    rmse = models.DecimalField(max_digits=20, decimal_places=4,default=0)
+    mse = models.DecimalField(max_digits=20, decimal_places=4,default=0)
+    mape = models.DecimalField(max_digits=20, decimal_places=4,default=0)
+    mad = models.DecimalField(max_digits=20, decimal_places=4,default=0)
+    is_boxcox = models.BooleanField(default=False)
+    lmbda = models.DecimalField(max_digits=20, decimal_places=4,default=0)
+
+    forecasts = models.JSONField(null=True)
+    graph = models.ImageField(null=True)
+
+    def __str__(self):
+        formatted = self.dataset + "LSTM Model" 
         return formatted

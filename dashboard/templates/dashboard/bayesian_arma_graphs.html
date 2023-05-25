@@ -23,7 +23,15 @@
 
                 <div class="modal-body p-3">
 
-                    {{ bayesian_form | crispy }}
+                    <div class="row">
+                        <b class="mb-2">Transformation:</b>
+                        {{ bayesian_form.is_boxcox | as_crispy_field }}
+                    </div>
+                    <div class="row">
+                        <div class="col-3">
+                            {{ bayesian_form.lmbda | as_crispy_field }}
+                        </div>
+                    </div>
 
                 </div>
                 
