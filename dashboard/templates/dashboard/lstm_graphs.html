@@ -3,71 +3,36 @@
 {% load crispy_forms_tags %}
 <div class="row">
     <div class="col-auto">
-        <h2 class="fw-bold">SARIMA Models</h2>
+        <h2 class="fw-bold">LSTM Models</h2>
     </div>
 
     <div class="col-auto"> 
-        <a class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addsarima">Add Model</a>
+        <a class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addlstm">Add Model</a>
     </div>
 </div>
 
-<!-- Add Sarima -->
-<div class="modal fade" id="addsarima">
+<!-- Add lstm -->
+<div class="modal fade" id="addlstm">
     <div class="modal-dialog modal-dialog-scrollable modal-lg">
-        <form method="POST" action="{% url 'add_sarima' dataset %}" enctype="multipart/form-data">
+        <form method="POST" action="{% url 'add_lstm' dataset %}" enctype="multipart/form-data">
             {% csrf_token %}
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="exampleModalLabel">Add a SARIMA Model</h5>
+                    <h5 class="modal-title" id="exampleModalLabel">Add a LSTM Model</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
 
                 <div class="modal-body p-3">
 
                     <div class="row">
-                        <div class="col-3">
-                            <b>Order:</b>
-                        </div>
-                        <div class="col-2">
-                            {{ sarima_form.p_param | as_crispy_field }}
-                        </div>
-                        <div class="col-2">
-                            {{ sarima_form.d_param | as_crispy_field }}
-                        </div>
-                        <div class="col-2">
-                            {{ sarima_form.q_param | as_crispy_field }}
-                        </div>
-                    </div>
-
-                    <div class="row">
-                        <div class="col-3">
-                            <b>Seasonal Order:</b>
-                        </div>
-                        <div class="col-2">
-                            {{ sarima_form.sp_param | as_crispy_field }}
-                        </div>
-                        <div class="col-2">
-                            {{ sarima_form.sd_param | as_crispy_field }}
-                        </div>
-                        <div class="col-2">
-                            {{ sarima_form.sq_param | as_crispy_field }}
-                        </div>
-                        <div class="col-2">
-                            {{ sarima_form.m_param | as_crispy_field }}
-                        </div>
-                    </div>
-
-                    <div class="row">
                         <b class="mb-2">Transformation:</b>
-                        {{ sarima_form.is_boxcox | as_crispy_field }}
+                        {{ lstm_form.is_boxcox | as_crispy_field }}
                     </div>
                     <div class="row">
                         <div class="col-3">
-                            {{ sarima_form.lmbda | as_crispy_field }}
+                            {{ lstm_form.lmbda | as_crispy_field }}
                         </div>
                     </div>
-
-                    <!-- {{ sarima_form | crispy }} -->
 
                 </div>
                 
@@ -79,9 +44,9 @@
         </form>
     </div>
 </div>
-<!-- End Add Sarima -->
+<!-- End Add lstm -->
 
-{% for model in sarima_models %}
+{% for model in lstm_models %}
 <!-- Model Display -->
     <div class="row align-items-center">
         
@@ -103,29 +68,19 @@
         <div class="col">
             <div class="row gx-1">
                 <div class="col">
-                    <h4>{{model.get_shorthand_str}}<sub>{{model.m_param}}</sub></h4>
+                    <h4>{{model}}</h4>
                 </div>
                 <div class="col-auto">
-                    <a class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#forecastssarima{{model.id}}">Forecasts</a>
+                    <a class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#forecastslstm{{model.id}}">Forecasts</a>
                 </div>
                 <div class="col-auto">
-                    <a class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deletesarima{{model.id}}">Delete</a>
+                    <a class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deletelstm{{model.id}}">Delete</a>
                 </div>
             </div>
             {% if model.is_boxcox %}
             <p>BoxCox, Lambda = {{model.lmbda}}</p>
             {% endif %}
-            <!-- <div class="row">
-                <div class="col-auto">
-                    <a class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#forecastssarima{{model.id}}">Forecasts</a>
-                </div>
-                <div class="col-auto">
-                    <a class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deletesarima{{model.id}}">Delete</a>
-                </div>
-            </div> -->
             <hr>
-            <p><b>Order (p,d,q):</b> ({{model.p_param}},{{model.d_param}},{{model.q_param}})</p>
-            <p><b>Seasonal Order (P,D,Q)M:</b> ({{model.sp_param}},{{model.sd_param}},{{model.sq_param}})<sub>{{model.m_param}}</sub></h4></p>
             <p><b>Box Cox: 
                 {{ model.is_boxcox | yesno:'Yes,No' }}
             </b></p>
@@ -140,17 +95,10 @@
 
     </div>
 
-    <!-- <div class="row">
-        a
-        {{model.forecasts}}
-        {% for item in model.forecasts %}
-        <p>{{item}}</p>
-        {% endfor %}
-    </div> -->
 <!-- End Model Display -->
 
 <!-- Forecasts -->
-<div class="modal modal-lg fade" id="forecastssarima{{model.id}}" aria-labelledby="forecastmodal" aria-hidden="true">
+<div class="modal modal-lg fade" id="forecastslstm{{model.id}}" aria-labelledby="forecastmodal" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
 
         <div class="modal-content">
@@ -202,7 +150,7 @@
 <!-- End Forecasts -->
 
 <!-- Delete -->
-<div class="modal fade" id="deletesarima{{model.id}}" aria-labelledby="deletemodal" aria-hidden="true">
+<div class="modal fade" id="deletelstm{{model.id}}" aria-labelledby="deletemodal" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
 
         <div class="modal-content">
@@ -217,7 +165,7 @@
             
             <div class="modal-footer">
                 <button type="button" class="btn btn-outline-dark" data-bs-dismiss="modal">Cancel</button>
-                <a class="btn btn-danger" href="{% url 'delete_sarima' dataset model.id %}"><i class="fa-solid fa-trash"></i> Delete</a>
+                <a class="btn btn-danger" href="{% url 'delete_lstm' dataset model.id %}"><i class="fa-solid fa-trash"></i> Delete</a>
                 <!-- {% comment %} <button type="button" class="btn btn-danger" href="{% url 'removeRecord' record.id %}">Save changes</button> {% endcomment %} -->
             </div>
         </div>

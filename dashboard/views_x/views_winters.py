@@ -18,6 +18,7 @@ from ..forms import *
 from ..models import *
 from ..utils_x.utils_winters import *
 
+
 def add_winters(request, dataset):
     filename = "static/{0} data.csv".format(str.lower(dataset))  
     with open(filename) as file:

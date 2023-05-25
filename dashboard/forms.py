@@ -42,7 +42,7 @@ class HoltWinters_add_form(ModelForm):
 class LSTM_add_form(ModelForm):
 
     class Meta:
-        model = BayesianARMAModel
+        model = LSTMModel
         fields = ['is_boxcox','lmbda']
         labels = {
             'is_boxcox' : 'Use Box Cox Transformation',
