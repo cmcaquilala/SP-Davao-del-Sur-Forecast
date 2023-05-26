@@ -9,6 +9,7 @@ from .views_x import *
 urlpatterns = [
     path('', views.index_page, name='index_page'),
     path('<str:dataset>', views.graphs_page, name='graphs_page'),
+    path('change_summary_year/<str:dataset>', views.change_summary_year, name='change_summary_year'),
     path('add_sarima/<str:dataset>', views.add_sarima, name='add_sarima'),
     path('add_bayesian/<str:dataset>', views.add_bayesian, name='add_bayesian'),
     path('add_winters/<str:dataset>', views.add_winters, name='add_winters'),

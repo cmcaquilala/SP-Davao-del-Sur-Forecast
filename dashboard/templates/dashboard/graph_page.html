@@ -17,6 +17,24 @@
             class="img-fluid">
             
             {% endif %}
+
+            <form method="POST" action="{% url 'change_summary_year' dataset %}">
+                {% csrf_token %}
+                <div class="row justify-content-end align-items-center mx-5">
+                    <div class="col-auto">
+                        Latest Forecast (up to 2050)
+                    </div>
+                    <div class="col-2">
+                        <input type="number" class="form-control" name="summary_end_year" placeholder="Year"/>
+                    </div>
+                    <div class="col-auto align-items-center">
+                        <button class="btn btn-success" type="submit">
+                            Refresh
+                        </button>
+                    </div>
+                </div>
+            </form>
+
         </div>
 
         <div class="col">
@@ -32,6 +50,7 @@
             </div>
             
             <p>Using the {{dataset}} dataset of Davao del Sur from 1987 to 2022.</p>
+
         </div>
 
         

@@ -33,6 +33,10 @@ import pandas as pd
 def index_page(request):
     return render(request, 'dashboard/index.html')
 
+def change_summary_year(request, dataset):
+    request.session['summary_end_year'] = int(request.POST['summary_end_year'])
+    return redirect('graphs_page', dataset)
+
 def graphs_page(request, dataset):
     # Load dataset
     filename = "static/{0} data.csv".format(str.lower(dataset))  
@@ -71,9 +75,14 @@ def graphs_page(request, dataset):
 
     # temporary date
     test_set = dataset_data[132:]
-    end_year = 2030
 
-    merged_graphs = get_merged_graphs(sarima_models, bayesian_models, winters_models, lstm_models, test_set, end_year)
+    summary_end_year = 2025
+    if 'summary_end_year' in request.session:
+        summary_end_year = int(request.session['summary_end_year'])
+    else:
+        request.session['summary_end_year'] = summary_end_year
+
+    merged_graphs = get_merged_graphs(sarima_models, bayesian_models, winters_models, lstm_models, test_set, summary_end_year)
 
     context = {
         'dataset' : dataset,
