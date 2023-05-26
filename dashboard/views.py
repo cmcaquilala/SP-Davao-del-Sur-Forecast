@@ -50,20 +50,20 @@ def graphs_page(request, dataset):
 
     # Loads forms for modal
     sarima_form = SARIMA_add_form(request.POST)
-    bayesian_form = BayesianARMA_add_form(request.POST)
+    bayesian_form = BayesianSARIMA_add_form(request.POST)
     winters_form = HoltWinters_add_form(request.POST)
     lstm_form = LSTM_add_form(request.POST)
 
     # Load all models
     sarima_models = []
-    bayesian_arma_models = []
+    bayesian_models = []
     winters_models = []
     lstm_models = []
 
     for x in SARIMAModel.objects.filter(dataset=dataset):
         sarima_models.append(x)
-    for x in BayesianARMAModel.objects.filter(dataset=dataset):
-        bayesian_arma_models.append(x)
+    for x in BayesianSARIMAModel.objects.filter(dataset=dataset):
+        bayesian_models.append(x)
     for x in HoltWintersModel.objects.filter(dataset=dataset):
         winters_models.append(x)
     for x in LSTMModel.objects.filter(dataset=dataset):
@@ -72,13 +72,13 @@ def graphs_page(request, dataset):
     # temporary date
     test_set = dataset_data[132:]
 
-    merged_graphs = get_merged_graphs(sarima_models, bayesian_arma_models, winters_models, lstm_models, test_set)
+    merged_graphs = get_merged_graphs(sarima_models, bayesian_models, winters_models, lstm_models, test_set)
 
     context = {
         'dataset' : dataset,
         'merged_graphs' : merged_graphs,
         'sarima_models' : sarima_models,
-        'bayesian_arma_models' : bayesian_arma_models,
+        'bayesian_models' : bayesian_models,
         'winters_models' : winters_models,
         'lstm_models' : lstm_models,
         'sarima_form' : sarima_form,

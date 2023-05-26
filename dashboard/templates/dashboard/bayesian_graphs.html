@@ -1,0 +1,238 @@
+{% load static %}
+{% load humanize %}
+{% load crispy_forms_tags %}
+<div class="row">
+    <div class="col-auto">
+        <h2 class="fw-bold">Bayesian SARIMA Models</h2>
+    </div>
+
+    <div class="col-auto"> 
+        <a class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addbayesian">Add Model</a>
+    </div>
+</div>
+
+<!-- Add Sarima -->
+<div class="modal fade" id="addbayesian">
+    <div class="modal-dialog modal-dialog-scrollable modal-lg">
+        <form method="POST" action="{% url 'add_bayesian' dataset %}" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Add a Bayesian SARIMA Model</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <div class="modal-body p-3">
+
+                    <div class="row">
+                        <div class="col-3">
+                            <b>Order:</b>
+                        </div>
+                        <div class="col-2">
+                            {{ bayesian_form.p_param | as_crispy_field }}
+                        </div>
+                        <div class="col-2">
+                            {{ bayesian_form.d_param | as_crispy_field }}
+                        </div>
+                        <div class="col-2">
+                            {{ bayesian_form.q_param | as_crispy_field }}
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-3">
+                            <b>Seasonal Order:</b>
+                        </div>
+                        <div class="col-2">
+                            {{ bayesian_form.sp_param | as_crispy_field }}
+                        </div>
+                        <div class="col-2">
+                            {{ bayesian_form.sd_param | as_crispy_field }}
+                        </div>
+                        <div class="col-2">
+                            {{ bayesian_form.sq_param | as_crispy_field }}
+                        </div>
+                        <div class="col-2">
+                            {{ bayesian_form.m_param | as_crispy_field }}
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <b class="mb-2">Transformation:</b>
+                        {{ bayesian_form.is_boxcox | as_crispy_field }}
+                    </div>
+                    <div class="row">
+                        <div class="col-3">
+                            {{ bayesian_form.lmbda | as_crispy_field }}
+                        </div>
+                    </div>
+
+                    <!-- {{ bayesian_form | crispy }} -->
+
+                </div>
+                
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-dark" data-bs-dismiss="modal">Close</button>
+                    <button type="Submit" class="btn btn-primary" >Save changes</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+<!-- End Add Sarima -->
+
+{% for model in bayesian_models %}
+<!-- Model Display -->
+    <div class="row align-items-center">
+        
+        <div class="col-8">
+            <!-- {% if model.graph %}
+        
+                <img src="data:image/png;base64, {{model.graph|safe}}"
+                    class="img-fluid">
+        
+            {% endif %} -->
+
+            {% if model.graph %}
+
+            <img src="static/images/{{model.graph}}" class="img-fluid">
+
+            {% endif %}
+        </div>
+
+        <div class="col">
+            <div class="row gx-1">
+                <div class="col">
+                    <h4>{{model.get_shorthand_str}}<sub>{{model.m_param}}</sub></h4>
+                </div>
+                <div class="col-auto">
+                    <a class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#forecastsbayesian{{model.id}}">Forecasts</a>
+                </div>
+                <div class="col-auto">
+                    <a class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deletebayesian{{model.id}}">Delete</a>
+                </div>
+            </div>
+            {% if model.is_boxcox %}
+            <p>BoxCox, Lambda = {{model.lmbda}}</p>
+            {% endif %}
+            <!-- <div class="row">
+                <div class="col-auto">
+                    <a class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#forecastsbayesian{{model.id}}">Forecasts</a>
+                </div>
+                <div class="col-auto">
+                    <a class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deletebayesian{{model.id}}">Delete</a>
+                </div>
+            </div> -->
+            <hr>
+            <p><b>Order (p,d,q):</b> ({{model.p_param}},{{model.d_param}},{{model.q_param}})</p>
+            <p><b>Seasonal Order (P,D,Q)M:</b> ({{model.sp_param}},{{model.sd_param}},{{model.sq_param}})<sub>{{model.m_param}}</sub></h4></p>
+            <p><b>Box Cox: 
+                {{ model.is_boxcox | yesno:'Yes,No' }}
+            </b></p>
+            {% if model.is_boxcox %}
+            <p><b>Lambda:</b> {{model.lmbda | intcomma}}</p>
+            {% endif %}
+            <p><b>BIC:</b> {{model.bic | intcomma}}</p>
+            <p><b>MSE:</b> {{model.mse | intcomma}}</p>
+            <p><b>RMSE:</b> {{model.rmse | intcomma}}</p>
+            <p><b>MAPE:</b> {{model.mape | intcomma}} %</p>
+        </div>
+
+    </div>
+
+    <!-- <div class="row">
+        a
+        {{model.forecasts}}
+        {% for item in model.forecasts %}
+        <p>{{item}}</p>
+        {% endfor %}
+    </div> -->
+<!-- End Model Display -->
+
+<!-- Forecasts -->
+<div class="modal modal-lg fade" id="forecastsbayesian{{model.id}}" aria-labelledby="forecastmodal" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Forecasts</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            
+            <div class="modal-body p-3">
+                
+                <table class="table">
+                    <thead>
+                        <th>Period</th>
+                        <th>Actual Value</th>
+                        <th>Forecast</th>
+                        <th>Error</th>
+                    </thead>
+                    <tbody>
+                        {% for item in model.forecasts %}
+                        <tr>
+                            <td>
+                                {{item.period}}
+                            </td>
+                            <td>
+                                {% if item.actual != 0 %}
+                                {{item.actual | intcomma}}
+                                {% endif %}
+                            </td>
+                            <td>{{item.prediction | intcomma}}</td>
+                            <td>
+                                {% if item.actual != 0 %}
+                                {{item.error | intcomma}}
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+
+            </div>
+            
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-dark" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+
+    </div>
+</div>
+<!-- End Forecasts -->
+
+<!-- Delete -->
+<div class="modal fade" id="deletebayesian{{model.id}}" aria-labelledby="deletemodal" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Delete Model</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            
+            <div class="modal-body p-3">
+                <p>Are you sure you want to delete this model?</p>
+            </div>
+            
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-dark" data-bs-dismiss="modal">Cancel</button>
+                <a class="btn btn-danger" href="{% url 'delete_bayesian' dataset model.id %}"><i class="fa-solid fa-trash"></i> Delete</a>
+                <!-- {% comment %} <button type="button" class="btn btn-danger" href="{% url 'removeRecord' record.id %}">Save changes</button> {% endcomment %} -->
+            </div>
+        </div>
+
+    </div>
+</div>
+<!-- End Delete -->
+
+<br>
+
+{% empty %}
+
+<br>
+<div class="container bg-light p-5 rounded font-weight-light">
+    <p class="text-center text-secondary">There are no models.</p>
+</div>
+
+{% endfor %}

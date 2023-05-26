@@ -44,7 +44,7 @@
     <br>
     <hr>
 
-    {% include 'dashboard/bayesian_arma_graphs.html' %}
+    {% include 'dashboard/bayesian_graphs.html' %}
 
     <br>
     <hr>
@@ -93,7 +93,7 @@
                             <td>{{model.mape | intcomma}}</td>
                         </tr>
                         {% endfor %}
-                        {% for model in bayesian_arma_models %}
+                        {% for model in bayesian_models %}
                         <tr>
                             <td>{{model.get_shorthand_str}}<sub>{{model.m_param}}</sub>
                                 {% if model.is_boxcox %}

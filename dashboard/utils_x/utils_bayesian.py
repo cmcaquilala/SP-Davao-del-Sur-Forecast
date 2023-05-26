@@ -5,12 +5,10 @@ import math
 from .utils import *
 
 # stat-related
-from statsmodels.graphics.tsaplots import plot_pacf
-from statsmodels.graphics.tsaplots import plot_acf
-from statsmodels.tsa.statespace.sarimax import SARIMAX
-from statsmodels.tsa.holtwinters import ExponentialSmoothing
-from statsmodels.tsa.stattools import adfuller
-from scipy import stats, special
+# from statsmodels.graphics.tsaplots import plot_pacf
+# from statsmodels.graphics.tsaplots import plot_acf
+# from statsmodels.tsa.stattools import adfuller
+# from scipy import stats, special
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -26,102 +24,143 @@ import rpy2
 import rpy2.robjects as robjects
 from rpy2.robjects.packages import importr, data
 
-def model_bayesian(df, dataset_name, my_order, is_box_cox):
-	train_set = df[0:132]
-	test_set = df[132:]
+r_base = importr('base')
+r_utils = importr('utils')
+r_generics = importr('generics')
 
-	num_samples = 10000
-	forecasted_vals = []
-	num_periods = test_set['Volume'].size
+r_utils.chooseCRANmirror(ind=1)
+r_utils.install_packages('stats')
+r_utils.install_packages('forecast')
+r_utils.install_packages("rstan")
+r_utils.install_packages('bayesforecast')
 
-	with pm.Model() as bayes_model:
-		#priors
-		phi = pm.Normal("phi", mu=0, sigma=1, shape=my_order[0])
-		# delta = pm.Normal("delta", mu=0, sigma=1, shape=q_param)
-		sigma = pm.InverseGamma("sigma", alpha=0.01, beta=0.01)
-		#Likelihood
-		likelihood = pm.AR("x", phi, sigma, observed=train_set['Volume'])
-		#posterior
-		trace = pm.sample(1000, cores=2)
+r_stats = importr('stats')
+r_forecast = importr('forecast')
+r_bayesforecast = importr('bayesforecast')
 
-	phi_vals = []
-	for i in range(trace.posterior.phi[0][0].size):
-		phi_vals.append(trace.posterior.phi[0][:,i])
+def model_bayesian(filename, dataset_data, dataset_name, my_order, my_seasonal_order, is_boxcox, lmbda):
 
-	# phi1_vals = trace.posterior.phi[0][:,0]
-	# phi2_vals = trace.posterior.phi[0][:,1]
-	sigma_vals = trace.posterior.sigma[0]
+	# Initialization
+	no_of_forecasts = 12
+	train_set_size = 132
+	no_of_iterations = 5000
 
-    # print(sigma_vals)
+	train_set = dataset_data[0:train_set_size]
+	test_set = dataset_data[train_set_size:]
 
-	for _ in range(num_samples):
-		curr_vals = list(train_set['Volume'].copy())
-        
-		phi_val = []
-		for i in range(len(phi_vals)):
-			phi_val.append(np.random.choice(phi_vals[i]))
+	# ----------------------
+	# Using rpy2:
+	# Convert inputs
+	r_order = robjects.FloatVector([my_order[0],my_order[1],my_order[2]])
+	r_seasonal_order = robjects.FloatVector([my_seasonal_order[0],my_seasonal_order[1],my_seasonal_order[2]])
+	r_null = robjects.r['as.null']()
 
-		# phi1_val = np.random.choice(phi1_vals)
-		# phi2_val = np.random.choice(phi2_vals)
-		sigma_val = np.random.choice(sigma_vals)
-        
-		# my_value = np.random.normal(0, sigma_val)
-		for _ in range(num_periods):
-			my_value = np.random.normal(0, sigma_val)
-			for i in range(len(phi_val)):
-				my_value += curr_vals[-i]*phi_val[i]
-			curr_vals.append(my_value)
-			# curr_vals.append(curr_vals[-1]*phi1_val + curr_vals[-2]*phi2_val + np.random.normal(0, sigma_val))
-		forecasted_vals.append(curr_vals[-num_periods:]) 
-	forecasted_vals = np.array(forecasted_vals)
+	# import data
+	r_dataset_data = r_utils.read_csv(filename)
+	r_dataset_data_ts = r_stats.ts(data = r_dataset_data[1], frequency = 4, start = [1987,1])
 
-	obtained_means = []
-	for i in range(num_periods):
-		plt.figure(figsize=(10,4))
-		vals = forecasted_vals[:,i]
-		mu, dev = round(vals.mean(), 3), round(vals.std(), 3)
-		sns.distplot(vals)
-		# p1 = plt.axvline(forecast[0][i], color='k')
-		p2 = plt.axvline(vals.mean(), color='b')
-		obtained_means.append(vals.mean())
-		# plt.legend((p1,p2), ('MLE', 'Posterior Mean'), fontsize=20)
-		# plt.legend(p2, 'Posterior Mean', fontsize=20)
-		# plt.title('Forecasted t+%s\nPosterior Mean: %s\nMLE: %s\nSD Bayes: %s\nSD MLE: %s'%((i+1), mu, round(forecast[0][i],3), dev, round(forecast[1][i],3)), fontsize=20)
+	# train-test split
+	r_train_set = r_stats.ts(r_dataset_data_ts[0:train_set_size], frequency = 4, start = [1987,1])
+	r_test_set = r_stats.ts(r_dataset_data_ts[train_set_size:len(r_dataset_data_ts)], frequency = 4, start = [2020,1])
 
-	# Diagnostics
+	r_data_transf = r_train_set
 
-	# Test Set Fitting
-	predictions = obtained_means
-	predictions = pd.Series(predictions, index=test_set.index)
-	# residuals = test_set['Volume'] - predictions
+	# get boxcox lambda
+	if is_boxcox and lmbda == 0:
+		r_lambda = r_forecast.BoxCox_lambda(r_train_set)
+
+	# transform if needed
+	if is_boxcox:
+		r_data_transf = r_forecast.BoxCox(r_train_set, r_lambda)
+
+	# create model
+	print("where error?")
+	r_model = r_bayesforecast.stan_sarima(ts=r_data_transf)
+	print("miderror?")
+	r_model = r_bayesforecast.stan_sarima(ts=r_data_transf, order=r_order, seasonal=r_seasonal_order,
+										prior_ar=r_bayesforecast.normal(0,1), prior_ma=r_bayesforecast.normal(0,1), prior_sigma0=r_bayesforecast.inverse_gamma(0.01,0.01),
+										iter = no_of_iterations)
+	print("past error")
+
+	# Getting fitted values
+	r_data_fitted = r_generics.forecast(r_data_transf, model=r_model,h=no_of_forecasts)
+
+	# --if boxcox, tranform back
+	if is_boxcox:
+		r_data_fitted = r_forecast.InvBoxCox(r_data_fitted[1], r_lambda)
+
+	# metrics
+	r_metrics = r_generics.accuracy(r_data_fitted,r_test_set)
+
+	# forecasts
+	r_forecasts = r_generics.forecast(r_dataset_data_ts,model=r_model,h=no_of_forecasts)
+
+	# End of rpy2
+	# ----------------------
 
 	# Model Evaluation
-	model_MSE = get_MSE(test_set['Volume'].values,predictions.values)
-	model_RMSE = get_RMSE(test_set['Volume'].values,predictions.values)
-	model_MAPE = get_MAPE(test_set['Volume'].values,predictions.values)
+	model_MSE = r_metrics[1]*r_metrics[1]
+	model_RMSE = r_metrics[1]
+	model_MAPE = r_metrics[4]
+	# model_bic = r_model[15]
+	# model_aic = r_model[5]
+	# model_aicc = r_model[14]
 
-	# Graph Plotting
-	points_to_display = 100
+	# # Graph Plotting
+	# points_to_display = 100
 
+	predictions = []
+	forecasts = []
+
+	for x in r_data_fitted:
+		predictions.append(x)
+
+	for x in r_forecasts[1]:
+		forecasts.append(x)
+
+	forecast_start = test_set['Date'][test_set.index.stop-1] + pd.DateOffset(months=3)
+	forecast_dates = pd.date_range(forecast_start, periods=no_of_forecasts, freq="QS")
+	predictions_df = pd.DataFrame(
+		{'Date': test_set['Date'],
+		'Volume': predictions})
+	forecasts_df = pd.DataFrame(
+		{'Date': forecast_dates,
+		'Volume': forecasts})
+
+	predict_plot = pd.concat([predictions_df, forecasts_df], ignore_index=True)
+
+	# Plotting
 	plt.figure(figsize=[15, 7.5]); # Set dimensions for figure
-	# plt.xlim([points_to_display,df.size-points_to_display])
-	plt.xlim([df['Date'][0],df['Date'][df['Date'].size-1]])
-	plt.plot(df['Date'], df['Volume'])
-	plt.plot(test_set['Date'], predictions)
-	plot_title = 'Quarterly ' + dataset_name + ' Production Volume of Davao del Sur Using Bayesian ARMA' + str(my_order)
+	plt.plot(dataset_data['Date'], dataset_data['Volume'])
+	plt.plot(predict_plot['Date'], predict_plot['Volume'])
+	# plt.plot(test_set['Date'], predictions)
+	plot_title = 'Quarterly ' + dataset_name + ' Production Volume of Davao del Sur Using Bayesian SARIMA' + str(my_order) + str(my_seasonal_order)
 	plt.title(plot_title)
 	plt.ylabel('Volume in Tons')
 	plt.xlabel('Date')
 	plt.xticks(rotation=45)
 	plt.grid(True)
+
+	filename = "models/{0} {1}{2}{3} {4} {5}.png".format(
+		dataset_name,
+		"Bayesian SARIMA",
+		my_order,
+		my_seasonal_order,
+		"BC" + str(lmbda) if is_boxcox else "",
+		get_timestamp(),
+	)
+	plt.savefig("static/images/" + filename, format = "png")
 	graph = get_graph()
 
 	return {
 		"graph" : graph,
-		# "model" : model,
+		"filename" : filename,
 		"predictions" : predictions,
+		"forecasts" : forecasts,
 		"test_set" : test_set,
+		# "bic" : model_BIC,
 		"mse" : model_MSE,
 		"rmse" : model_RMSE,
 		"mape" : model_MAPE,
+		"lmbda" : lmbda,
 	}

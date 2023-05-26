@@ -42,7 +42,7 @@ class SARIMAModel(models.Model):
 
         return self.dataset + " SARIMA" + order + seasonal + addons
 
-class BayesianARMAModel(models.Model):
+class BayesianSARIMAModel(models.Model):
     dataset = models.TextField(null=True)
     p_param = models.SmallIntegerField(validators=[MinValueValidator(0)])
     d_param = models.SmallIntegerField(validators=[MinValueValidator(0)])
@@ -50,6 +50,7 @@ class BayesianARMAModel(models.Model):
     sp_param = models.SmallIntegerField(validators=[MinValueValidator(0)])
     sd_param = models.SmallIntegerField(validators=[MinValueValidator(0)])
     sq_param = models.SmallIntegerField(validators=[MinValueValidator(0)])
+    m_param = models.SmallIntegerField(validators=[MinValueValidator(0)])
     bic = models.DecimalField(max_digits=20, decimal_places=4,default=0)
     rmse = models.DecimalField(max_digits=20, decimal_places=4,default=0)
     mse = models.DecimalField(max_digits=20, decimal_places=4,default=0)

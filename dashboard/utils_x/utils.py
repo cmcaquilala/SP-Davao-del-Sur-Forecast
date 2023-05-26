@@ -51,7 +51,7 @@ def get_plot(x,y):
 	graph = get_graph()
 	return graph
 
-def get_merged_graphs(sarima_models, bayesian_arma_models, winters_models, lstm_models, test_set):
+def get_merged_graphs(sarima_models, bayesian_models, winters_models, lstm_models, test_set):
 	plt.figure(figsize=[15, 7.5]); # Set dimensions for figure
 	plot_title = 'Quarterly Predictions of Production Volume of Davao del Sur'
 	plt.title(plot_title)
@@ -66,7 +66,7 @@ def get_merged_graphs(sarima_models, bayesian_arma_models, winters_models, lstm_
     
 	date_start = test_set['Date'][test_set.index.start]
 
-	if (len(sarima_models) + len(bayesian_arma_models) < 1):
+	if (len(sarima_models) + len(bayesian_models) < 1):
 		return get_graph()
 
 	for model in sarima_models:
@@ -83,7 +83,7 @@ def get_merged_graphs(sarima_models, bayesian_arma_models, winters_models, lstm_
 			"BC " + str(model.lmbda) if model.is_boxcox else ""))
 		plt.legend()
 
-	for model in bayesian_arma_models:
+	for model in bayesian_models:
 		# predict_plot = pd.concat([predictions_df, forecasts_df], ignore_index=True)
 		no_of_periods = len(model.forecasts)
 		forecast_dates = pd.date_range(start=date_start, periods=no_of_periods, freq="QS")
