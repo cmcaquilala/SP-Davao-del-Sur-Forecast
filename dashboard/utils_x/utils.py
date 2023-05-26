@@ -51,7 +51,7 @@ def get_plot(x,y):
 	graph = get_graph()
 	return graph
 
-def get_merged_graphs(sarima_models, bayesian_models, winters_models, lstm_models, test_set):
+def get_merged_graphs(sarima_models, bayesian_models, winters_models, lstm_models, test_set, end_year):
 	plt.figure(figsize=[15, 7.5]); # Set dimensions for figure
 	plot_title = 'Quarterly Predictions of Production Volume of Davao del Sur'
 	plt.title(plot_title)
@@ -65,18 +65,19 @@ def get_merged_graphs(sarima_models, bayesian_models, winters_models, lstm_model
 	plt.legend()
     
 	date_start = test_set['Date'][test_set.index.start]
+	no_of_periods = (end_year - 2020 + 1) * 4
 
 	if (len(sarima_models) + len(bayesian_models) < 1):
 		return get_graph()
 
 	for model in sarima_models:
 		# predict_plot = pd.concat([predictions_df, forecasts_df], ignore_index=True)
-		no_of_periods = len(model.forecasts)
+		# no_of_periods = len(model.forecasts)
 		forecast_dates = pd.date_range(start=date_start, periods=no_of_periods, freq="QS")
 
 		predictions = []
-		for item in model.forecasts:
-			predictions.append(item['prediction'])
+		for i in range(no_of_periods):
+			predictions.append(model.forecasts[i]['prediction'])
 
 		plt.plot(forecast_dates, predictions,label="{0} {1}".format(
 			model.get_shorthand_str(),
@@ -85,12 +86,13 @@ def get_merged_graphs(sarima_models, bayesian_models, winters_models, lstm_model
 
 	for model in bayesian_models:
 		# predict_plot = pd.concat([predictions_df, forecasts_df], ignore_index=True)
-		no_of_periods = len(model.forecasts)
+		# no_of_periods = len(model.forecasts)
 		forecast_dates = pd.date_range(start=date_start, periods=no_of_periods, freq="QS")
 
 		predictions = []
-		for item in model.forecasts:
-			predictions.append(item['prediction'])
+		j = model.forecasts[0]
+		for i in range(no_of_periods):
+			predictions.append(model.forecasts[i]['prediction'])
 
 		plt.plot(forecast_dates, predictions,label="{0} {1}".format(
 			model.get_shorthand_str(),
@@ -99,12 +101,12 @@ def get_merged_graphs(sarima_models, bayesian_models, winters_models, lstm_model
 
 	for model in winters_models:
 		# predict_plot = pd.concat([predictions_df, forecasts_df], ignore_index=True)
-		no_of_periods = len(model.forecasts)
+		# no_of_periods = len(model.forecasts)
 		forecast_dates = pd.date_range(start=date_start, periods=no_of_periods, freq="QS")
 
 		predictions = []
-		for item in model.forecasts:
-			predictions.append(item['prediction'])
+		for i in range(no_of_periods):
+			predictions.append(model.forecasts[i]['prediction'])
 
 		plt.plot(forecast_dates, predictions,label="{0} {1}".format(
 			str(model),
@@ -113,12 +115,12 @@ def get_merged_graphs(sarima_models, bayesian_models, winters_models, lstm_model
 
 	for model in lstm_models:
 		# predict_plot = pd.concat([predictions_df, forecasts_df], ignore_index=True)
-		no_of_periods = len(model.forecasts)
+		# no_of_periods = len(model.forecasts)
 		forecast_dates = pd.date_range(start=date_start, periods=no_of_periods, freq="QS")
 
 		predictions = []
-		for item in model.forecasts:
-			predictions.append(item['prediction'])
+		for i in range(no_of_periods):
+			predictions.append(model.forecasts[i]['prediction'])
 
 		plt.plot(forecast_dates, predictions,label="{0} {1}".format(
 			str(model),

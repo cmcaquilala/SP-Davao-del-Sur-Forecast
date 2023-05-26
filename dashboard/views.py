@@ -71,8 +71,9 @@ def graphs_page(request, dataset):
 
     # temporary date
     test_set = dataset_data[132:]
+    end_year = 2030
 
-    merged_graphs = get_merged_graphs(sarima_models, bayesian_models, winters_models, lstm_models, test_set)
+    merged_graphs = get_merged_graphs(sarima_models, bayesian_models, winters_models, lstm_models, test_set, end_year)
 
     context = {
         'dataset' : dataset,

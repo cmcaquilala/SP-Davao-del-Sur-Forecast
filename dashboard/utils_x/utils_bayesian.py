@@ -24,24 +24,25 @@ import rpy2
 import rpy2.robjects as robjects
 from rpy2.robjects.packages import importr, data
 
-r_base = importr('base')
-r_utils = importr('utils')
-r_generics = importr('generics')
+# r_base = importr('base')
+# r_utils = importr('utils')
+# r_generics = importr('generics')
 
-r_utils.chooseCRANmirror(ind=1)
-r_utils.install_packages('stats')
-r_utils.install_packages('forecast')
-r_utils.install_packages("rstan")
-r_utils.install_packages('bayesforecast')
+# r_utils.chooseCRANmirror(ind=1)
+# r_utils.install_packages('stats')
+# r_utils.install_packages('forecast')
+# r_utils.install_packages("rstan")
+# r_utils.install_packages('bayesforecast')
 
-r_stats = importr('stats')
-r_forecast = importr('forecast')
-r_bayesforecast = importr('bayesforecast')
+# r_stats = importr('stats')
+# r_forecast = importr('forecast')
+# r_bayesforecast = importr('bayesforecast')
 
 def model_bayesian(filename, dataset_data, dataset_name, my_order, my_seasonal_order, is_boxcox, lmbda):
 
 	# Initialization
-	no_of_forecasts = 12
+	# 28*4 forecasts = up to 2050
+	no_of_forecasts = 28 * 4
 	train_set_size = 132
 	no_of_iterations = 5000
 

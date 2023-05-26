@@ -28,10 +28,11 @@ from keras.layers import LSTM
 
 def model_lstm(filename, dataset_data, dataset_name, is_boxcox, lmbda):
 	# Initialization
+	# 28*4 forecasts = up to 2050
+	no_of_forecasts = 28 * 4
+	train_set_size = 132
 	n_input = 4
 	n_features = 1
-	no_of_forecasts = 12
-	train_set_size = 132
 
 	train_set = dataset_data[0:train_set_size]
 	test_set = dataset_data[train_set_size:]

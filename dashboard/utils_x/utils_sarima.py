@@ -39,7 +39,8 @@ r_forecast = importr('forecast')
 def model_sarima(filename, dataset_data, dataset_name, my_order, my_seasonal_order, is_boxcox, lmbda):
 
 	# Initialization
-	no_of_forecasts = 12
+	# 28*4 forecasts = up to 2050
+	no_of_forecasts = 28 * 4
 	train_set_size = 132
 
 	train_set = dataset_data[0:train_set_size]

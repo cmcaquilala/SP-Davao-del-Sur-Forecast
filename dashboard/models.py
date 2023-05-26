@@ -95,6 +95,10 @@ class HoltWintersModel(models.Model):
     forecasts = models.JSONField(null=True)
     graph = models.ImageField(null=True)
 
+    def get_shorthand_str(self):
+        shorthand = "Holt-Winters Model"
+        return shorthand
+
     def __str__(self):
         formatted = self.dataset + " Holt-Winters Model" 
         return formatted
@@ -110,6 +114,10 @@ class LSTMModel(models.Model):
 
     forecasts = models.JSONField(null=True)
     graph = models.ImageField(null=True)
+
+    def get_shorthand_str(self):
+        shorthand = "LSTM Model"
+        return shorthand
 
     def __str__(self):
         formatted = self.dataset + " LSTM Model" 
