@@ -45,28 +45,28 @@ def add_winters(request, dataset):
             is_boxcox = request.POST.get('is_boxcox', False)
             lmbda = 0 if (request.POST["lmbda"] == "" or request.POST["lmbda"] == None) else float(request.POST["lmbda"])
 
-            winters_model = model_winters(filename, dataset_data, dataset, is_boxcox, lmbda)
+            result_model = model_winters(filename, dataset_data, dataset, is_boxcox, lmbda)
 
             model.dataset = dataset
-            # model.graph = winters_model["graph"]
-            model.graph = winters_model["filename"]
-            # model.bic = winters_model["bic"]
-            model.mse = winters_model["mse"]
-            model.rmse = winters_model["rmse"]
-            model.mape = winters_model["mape"]
-            model.mad = winters_model["mad"]
-            model.lmbda = winters_model["lmbda"]
+            # model.graph = result_model["graph"]
+            model.graph = result_model["filename"]
+            # model.bic = result_model["bic"]
+            model.mse = result_model["mse"]
+            model.rmse = result_model["rmse"]
+            model.mape = result_model["mape"]
+            model.mad = result_model["mad"]
+            model.lmbda = result_model["lmbda"]
 
-            model_forecasts = []
-            # model_predictions = winters_model["predictions"] + winters_model["forecasts"]
-            model_predictions = np.concatenate([winters_model["predictions"], winters_model["forecasts"]])
+            forecasts_table = []
+            # model_predictions = result_model["predictions"] + result_model["forecasts"]
+            model_predictions = np.concatenate([result_model["predictions"], result_model["forecasts"]])
 
-            curr_date = pd.to_datetime(winters_model["test_set"]['Date'].values[0])
+            curr_date = pd.to_datetime(result_model["test_set"]['Date'].values[0])
             for i in range(len(model_predictions)):
                 year = curr_date.year
                 quarter = curr_date.month // 3 + 1
 
-                actual = winters_model["test_set"]['Volume'].values[i] if i < len(winters_model["test_set"]['Volume'].values) else 0
+                actual = result_model["test_set"]['Volume'].values[i] if i < len(result_model["test_set"]['Volume'].values) else 0
                 error = actual - model_predictions[i] if actual != 0 else 0
 
                 value_dict = {
@@ -75,17 +75,35 @@ def add_winters(request, dataset):
                     'prediction' : model_predictions[i],
                     'error' : error,
                 }
-                model_forecasts.append(value_dict)
+                forecasts_table.append(value_dict)
                 curr_date += relativedelta(months=3)
             
-            model.forecasts = model_forecasts
-            model.save()
+            model.forecasts = forecasts_table
+            # model.save()
+
+            # save into session
+            model_details = {
+                'id' : model.id,
+                'model_name' : result_model['model_name'],
+                'is_boxcox' : is_boxcox,
+                'lmbda' : lmbda,
+                'dataset' : dataset,
+                'mse' : result_model["mse"],
+                'rmse' : result_model["rmse"],
+                'mape' : result_model["mape"],
+                'mad' : result_model["mad"],
+                'lmbda' : result_model["lmbda"],
+                'forecasts' : model_predictions.tolist(),
+                'forecasts_table' : forecasts_table,
+            }
+            request.session['saved_winters'].append(model_details)
+            request.session.modified = True
 
     return redirect('graphs_page', dataset)
 
-def delete_winters(request, dataset, id):
-    model = HoltWintersModel.objects.get(id=id)
-    model.delete()
+# def delete_winters(request, dataset, id):
+#     model = HoltWintersModel.objects.get(id=id)
+#     model.delete()
 
-    return redirect('graphs_page', dataset)
+#     return redirect('graphs_page', dataset)
 

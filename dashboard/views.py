@@ -34,7 +34,10 @@ def index_page(request):
     return render(request, 'dashboard/index.html')
 
 def change_summary_year(request, dataset):
-    request.session['summary_end_year'] = int(request.POST['summary_end_year'])
+    if request.POST['summary_end_year'] in (None, ""):
+        request.session['summary_end_year'] = 2025
+    else:
+        request.session['summary_end_year'] = int(request.POST['summary_end_year'])
     return redirect('graphs_page', dataset)
 
 def graphs_page(request, dataset):
@@ -64,18 +67,27 @@ def graphs_page(request, dataset):
     winters_models = []
     lstm_models = []
 
-    for x in SARIMAModel.objects.filter(dataset=dataset):
-        sarima_models.append(x)
-    for x in BayesianSARIMAModel.objects.filter(dataset=dataset):
-        bayesian_models.append(x)
-    for x in HoltWintersModel.objects.filter(dataset=dataset):
-        winters_models.append(x)
-    for x in LSTMModel.objects.filter(dataset=dataset):
-        lstm_models.append(x)
+    # for x in SARIMAModel.objects.filter(dataset=dataset):
+    #     sarima_models.append(x)
+    # for x in BayesianSARIMAModel.objects.filter(dataset=dataset):
+    #     bayesian_models.append(x)
+    # for x in HoltWintersModel.objects.filter(dataset=dataset):
+    #     winters_models.append(x)
+    # for x in LSTMModel.objects.filter(dataset=dataset):
+    #     lstm_models.append(x)
 
-    # temporary date
-    test_set = dataset_data[132:]
+    # collect all models saved in session
 
+    if 'saved_winters' not in request.session:
+        request.session['saved_winters'] = []
+    else:
+        test = request.session['saved_winters']
+        for model in request.session['saved_winters']:
+            model['graph'] = plot_model(dataset_data, model)
+            winters_models.append(model)
+
+    # summary
+    summary_end_year = 2025
     if 'summary_end_year' in request.session:
         summary_end_year = int(request.session['summary_end_year'])
     else:
@@ -89,6 +101,7 @@ def graphs_page(request, dataset):
         summary_end_year = 2050
         request.session['summary_end_year'] = summary_end_year
 
+    test_set = dataset_data[132:]
     merged_graphs = get_merged_graphs(sarima_models, bayesian_models, winters_models, lstm_models, test_set, summary_end_year)
 
     context = {
@@ -101,7 +114,7 @@ def graphs_page(request, dataset):
         'sarima_form' : sarima_form,
         'bayesian_form' : bayesian_form,
         'winters_form' : winters_form,
-        'lstm_form' : winters_form,
+        'lstm_form' : lstm_form,
     }
 
     return render(request, 'dashboard/graph_page.html', context)

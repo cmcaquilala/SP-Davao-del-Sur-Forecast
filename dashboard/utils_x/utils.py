@@ -15,7 +15,7 @@ import math
 import pandas as pd
 
 # import pymc as pm
-# import numpy as np
+import numpy as np
 import matplotlib.pyplot as plt
 # import seaborn as sns
 # from statsmodels.tsa.arima_model import ARIMA
@@ -51,6 +51,26 @@ def get_plot(x,y):
 	graph = get_graph()
 	return graph
 
+def plot_model(dataset_data, model):
+	no_of_periods = 28 * 4 + 3 * 4
+	forecast_dates = pd.date_range(start=np.datetime64("2020-01-01"), periods=no_of_periods, freq="QS")
+
+	predictions = model['forecasts']
+
+	# Plotting
+	plt.figure(figsize=[15, 7.5]); # Set dimensions for figure
+	plt.plot(dataset_data['Date'], dataset_data['Volume'])
+	plt.plot(forecast_dates, predictions)
+	# plt.plot(test_set['Date'], predictions)
+	plot_title = 'Quarterly ' + model['dataset'] + ' Production Volume of Davao del Sur Using ' + model['model_name']
+	plt.title(plot_title)
+	plt.ylabel('Volume in Tons')
+	plt.xlabel('Date')
+	plt.xticks(rotation=45)
+	plt.grid(True)
+
+	return get_graph()
+
 def get_merged_graphs(sarima_models, bayesian_models, winters_models, lstm_models, test_set, end_year):
 	plt.figure(figsize=[15, 7.5]); # Set dimensions for figure
 	plot_title = 'Quarterly Predictions of Production Volume of Davao del Sur'
@@ -61,7 +81,7 @@ def get_merged_graphs(sarima_models, bayesian_models, winters_models, lstm_model
 	plt.grid(True)
 
 	plt.plot(test_set['Date'], test_set['Volume'],
-	  linewidth=4, label="Dataset")
+	  linewidth=4, label="Test Set")
 	plt.legend()
     
 	date_start = test_set['Date'][test_set.index.start]
@@ -106,11 +126,11 @@ def get_merged_graphs(sarima_models, bayesian_models, winters_models, lstm_model
 
 		predictions = []
 		for i in range(no_of_periods):
-			predictions.append(model.forecasts[i]['prediction'])
+			predictions.append(model['forecasts'][i])
 
 		plt.plot(forecast_dates, predictions,label="{0} {1}".format(
-			str(model),
-			"BC " + str(model.lmbda) if model.is_boxcox else ""))
+			str(model['model_name']),
+			"BC " + str(model['lmbda']) if model['is_boxcox'] else ""))
 		plt.legend()
 
 	for model in lstm_models:

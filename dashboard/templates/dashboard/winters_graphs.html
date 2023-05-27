@@ -60,7 +60,9 @@
 
             {% if model.graph %}
 
-            <img src="static/images/{{model.graph}}" class="img-fluid">
+            <!-- <img src="static/images/{{model.graph}}" class="img-fluid"> -->
+
+            <img src="data:image/png;base64, {{model.graph|safe}}" class="img-fluid">
 
             {% endif %}
         </div>
@@ -68,7 +70,7 @@
         <div class="col">
             <div class="row gx-1">
                 <div class="col">
-                    <h4>{{model}}</h4>
+                    <h4>{{model.model_name}}</h4>
                 </div>
                 <div class="col-auto">
                     <a class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#forecastswinters{{model.id}}">Forecasts</a>
@@ -99,7 +101,7 @@
 
 <!-- Forecasts -->
 <div class="modal modal-lg fade" id="forecastswinters{{model.id}}" aria-labelledby="forecastmodal" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
 
         <div class="modal-content">
             <div class="modal-header">
@@ -117,7 +119,7 @@
                         <th>Error</th>
                     </thead>
                     <tbody>
-                        {% for item in model.forecasts %}
+                        {% for item in model.forecasts_table %}
                         <tr>
                             <td>
                                 {{item.period}}
@@ -165,7 +167,9 @@
             
             <div class="modal-footer">
                 <button type="button" class="btn btn-outline-dark" data-bs-dismiss="modal">Cancel</button>
+                {%comment%}
                 <a class="btn btn-danger" href="{% url 'delete_winters' dataset model.id %}"><i class="fa-solid fa-trash"></i> Delete</a>
+                {%endcomment%}
                 <!-- {% comment %} <button type="button" class="btn btn-danger" href="{% url 'removeRecord' record.id %}">Save changes</button> {% endcomment %} -->
             </div>
         </div>

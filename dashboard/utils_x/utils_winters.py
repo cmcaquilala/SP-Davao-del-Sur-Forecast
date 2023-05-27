@@ -75,7 +75,6 @@ def model_winters(filename, dataset_data, dataset_name, is_boxcox, lmbda):
 	plt.figure(figsize=[15, 7.5]); # Set dimensions for figure
 	plt.plot(dataset_data['Date'], dataset_data['Volume'])
 	plt.plot(predict_plot['Date'], predict_plot['Volume'])
-	# plt.plot(test_set['Date'], predictions)
 	plot_title = 'Quarterly ' + dataset_name + ' Production Volume of Davao del Sur Using Holt-Winters'
 	plt.title(plot_title)
 	plt.ylabel('Volume in Tons')
@@ -92,7 +91,10 @@ def model_winters(filename, dataset_data, dataset_name, is_boxcox, lmbda):
 	plt.savefig("static/images/" + filename, format = "png")
 	graph = get_graph()
 
+	model_name = 'Holt-Winters'
+
 	return {
+		"model_name" : model_name,
 		"graph" : graph,
 		"filename" : filename,
 		"predictions" : predictions,

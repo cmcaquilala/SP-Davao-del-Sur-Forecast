@@ -17,14 +17,20 @@ import pymc as pm
 # import numpy as np
 # import matplotlib.pyplot as plt
 import seaborn as sns
-# from statsmodels.tsa.arima_model import ARIMA
+import tensorflow as tf
 
+# from statsmodels.tsa.arima_model import ARIMA
 from sklearn.preprocessing import MinMaxScaler
 from statsmodels.tsa.seasonal import seasonal_decompose
 from keras.preprocessing.sequence import TimeseriesGenerator
 from keras.models import Sequential
 from keras.layers import Dense
 from keras.layers import LSTM
+
+# reproducibility
+import os
+tf.keras.utils.set_random_seed(5)
+os.environ['PYTHONHASHSEED']=str(5)
 
 def model_lstm(filename, dataset_data, dataset_name, is_boxcox, lmbda):
 	# Initialization
