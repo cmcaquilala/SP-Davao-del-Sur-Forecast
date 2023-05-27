@@ -106,19 +106,40 @@ def delete_model(request, dataset, id):
     return redirect('graphs_page', dataset)
 
 def graphs_page(request, dataset):
-    # Load dataset
-    filename = "static/{0} data.csv".format(str.lower(dataset))  
-    with open(filename) as file:
-        reader = csv.reader(file)
-        readerlist = []
-        next(reader)
-        
-        for row in reader:
-            readerlist.append(row)
 
-    dataset_data = pd.DataFrame(readerlist, columns=['Date','Volume'])
-    dataset_data['Volume'] = pd.to_numeric(dataset_data['Volume'])
-    dataset_data['Date'] = pd.to_datetime(dataset_data['Date'])
+    # Load dataset
+    dataset_dates = "{0}_dataset_dates".format(dataset.lower())
+    dataset_name = "{0}_dataset_data".format(dataset.lower())
+    dataset_data = pd.DataFrame()
+
+    if dataset_name not in request.session:
+        request.session[dataset_dates] = []
+        request.session[dataset_name] = []
+
+        filename = "static/{0} data.csv".format(str.lower(dataset))  
+        with open(filename) as file:
+            reader = csv.reader(file)
+            readerlist = []
+            next(reader)
+            
+            for row in reader:
+                readerlist.append(row)
+
+        dataset_data = pd.DataFrame(readerlist, columns=['Date','Volume'])
+        dataset_data['Volume'] = pd.to_numeric(dataset_data['Volume'])
+        dataset_data['Date'] = pd.to_datetime(dataset_data['Date'])
+
+        request.session[dataset_dates] = dataset_data['Date'].astype(str).tolist()
+        request.session[dataset_name] = dataset_data['Volume'].tolist()
+
+        request.session.modified = True
+
+    else:
+        dataset_data = pd.DataFrame({
+            'Date' : request.session[dataset_dates],
+            'Volume' : request.session[dataset_name]},)
+        dataset_data['Volume'] = pd.to_numeric(request.session[dataset_name])
+        dataset_data['Date'] = pd.to_datetime(request.session[dataset_dates])
 
     # Loads forms for modal
     sarima_form = SARIMA_add_form(request.POST)

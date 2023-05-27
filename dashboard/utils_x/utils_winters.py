@@ -21,7 +21,7 @@ import seaborn as sns
 # from statsmodels.tsa.arima_model import ARIMA
 
 
-def model_winters(filename, dataset_data, dataset_name, is_boxcox, lmbda):
+def model_winters(dataset_data, dataset_name, is_boxcox, lmbda):
 	# Initialization
 	# 28*4 forecasts = up to 2050
 	no_of_forecasts = 28 * 4
@@ -96,7 +96,7 @@ def model_winters(filename, dataset_data, dataset_name, is_boxcox, lmbda):
 	return {
 		"model_name" : model_name,
 		"graph" : graph,
-		"filename" : filename,
+		# "filename" : filename,
 		"predictions" : predictions,
 		"forecasts" : forecasts,
 		"test_set" : test_set,

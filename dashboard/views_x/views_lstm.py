@@ -20,18 +20,15 @@ from ..utils_x.utils_lstm import *
 
 
 def add_lstm(request, dataset):
-    filename = "static/{0} data.csv".format(str.lower(dataset))  
-    with open(filename) as file:
-        reader = csv.reader(file)
-        readerlist = []
-        next(reader)
-        
-        for row in reader:
-            readerlist.append(row)
+    dataset_dates = "{0}_dataset_dates".format(dataset.lower())
+    dataset_name = "{0}_dataset_data".format(dataset.lower())
+    dataset_data = pd.DataFrame()
 
-    dataset_data = pd.DataFrame(readerlist, columns=['Date','Volume'])
-    dataset_data['Volume'] = pd.to_numeric(dataset_data['Volume'])
-    dataset_data['Date'] = pd.to_datetime(dataset_data['Date'])
+    dataset_data = pd.DataFrame({
+        'Date' : request.session[dataset_dates],
+        'Volume' : request.session[dataset_name]},)
+    dataset_data['Volume'] = pd.to_numeric(request.session[dataset_name])
+    dataset_data['Date'] = pd.to_datetime(request.session[dataset_dates])
 
     if request.method == "POST":
         form = LSTM_add_form(request.POST)
@@ -45,11 +42,11 @@ def add_lstm(request, dataset):
             is_boxcox = request.POST.get('is_boxcox', False)
             lmbda = 0 if (request.POST["lmbda"] == "" or request.POST["lmbda"] == None) else float(request.POST["lmbda"])
 
-            result_model = model_lstm(filename, dataset_data, dataset, is_boxcox, lmbda)
+            result_model = model_lstm(dataset_data, dataset, is_boxcox, lmbda)
 
             model.dataset = dataset
             # model.graph = result_model["graph"]
-            model.graph = result_model["filename"]
+            # model.graph = result_model["filename"]
             # model.bic = result_model["bic"]
             model.mse = result_model["mse"]
             model.rmse = result_model["rmse"]

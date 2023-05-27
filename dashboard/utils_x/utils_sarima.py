@@ -36,7 +36,7 @@ from rpy2.robjects.packages import importr, data
 # r_forecast = importr('forecast')
 
 
-def model_sarima(filename, dataset_data, dataset_name, my_order, my_seasonal_order, is_boxcox, lmbda):
+def model_sarima(dataset_data, dataset_name, my_order, my_seasonal_order, is_boxcox, lmbda):
 
 	# Initialization
 	# 28*4 forecasts = up to 2050
@@ -143,7 +143,7 @@ def model_sarima(filename, dataset_data, dataset_name, my_order, my_seasonal_ord
 
 	return {
 		"graph" : graph,
-		"filename" : filename,
+		# "filename" : filename,
 		"predictions" : predictions,
 		"forecasts" : forecasts,
 		"test_set" : test_set,
