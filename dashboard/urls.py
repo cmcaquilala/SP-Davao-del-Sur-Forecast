@@ -9,6 +9,9 @@ from .views_x import *
 urlpatterns = [
     path('', views.index_page, name='index_page'),
     path('<str:dataset>', views.graphs_page, name='graphs_page'),
+    path('<str:dataset>/edit', views.edit_dataset_page, name='edit_dataset_page'),
+
+    path('<str:dataset>/<str:date>', views.edit_datapoint, name='edit_datapoint'),
 
     path('change_summary_year/<str:dataset>', views.change_summary_year, name='change_summary_year'),
     path('change_model_year/<str:dataset>/<str:id>', views.change_model_year, name='change_model_year'),

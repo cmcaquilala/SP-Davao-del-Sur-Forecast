@@ -1,0 +1,87 @@
+{% extends 'dashboard/base.html' %}
+{% load static %}
+{% load crispy_forms_tags %}
+{% load humanize %}
+{% block title %}{{dataset}} Production{% endblock title %}
+
+
+{% block content %}
+
+<!-- Table -->
+<div class="container my-3 py-3">
+
+    <div class="row align-items-center">
+        <h1 class="fw-bold">{{dataset}} Dataset</h1>
+    </div>
+        
+    <hr>
+
+    <div class="row">
+        
+        <table class="table">
+            <thead>
+                <th class="col-2">Quarter</th>
+                <th class="col-4">Volume</th>
+                <th class="col-1"></th>
+            </thead>
+            <tbody>
+                {% for item in dataset_table %}
+                <tr>
+                    <td>{{item.period}}</td>
+                    <td>{{item.volume}}</td>
+                    <td class="text-end">
+                        <a class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#edit{{item.date}}">Edit</a>
+                    </td>
+                </tr>
+
+                <!-- Edit -->
+                <div class="modal fade" id="edit{{item.date}}" aria-labelledby="edit{{item.date}}" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered">
+
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="exampleModalLabel">Delete Model</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            
+                            <form method="POST" action="{% url 'edit_datapoint' dataset item.date %}">
+                                <div class="modal-body p-3">
+                                    {% csrf_token %}
+                                    <label class="mb-2" for="{{item.date}}_form">New Volume</label>
+                                    <input id="{{item.date}}_form" type="string" class="form-control" name="new_volume" value="{{item.volume}}"/>
+                                    <div id="itemnotice" class="form-text text-danger">Warning! Modifying the dataset will clear all models.</div>
+                                </div>
+                                
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-outline-dark" data-bs-dismiss="modal">Cancel</button>
+                                    <button class="btn btn-primary" type="submit">Save</button>
+                                    <!-- {% comment %} <button type="button" class="btn btn-danger" href="{% url 'removeRecord' record.id %}">Save changes</button> {% endcomment %} -->
+                                </div>
+                            </form>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- Delete -->
+
+
+                {% endfor %}
+                <tr>
+                    <td class="text-center" colspan="3">
+                        <a class="btn btn-success">Add a record</a>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+    </div>
+
+</div>
+
+
+<!-- Add -->
+
+
+
+{% endblock content %}

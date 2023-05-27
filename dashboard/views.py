@@ -33,12 +33,14 @@ import pandas as pd
 def index_page(request):
     return render(request, 'dashboard/index.html')
 
+
 def change_summary_year(request, dataset):
     if request.POST['summary_end_year'] in (None, "") or int(request.POST['summary_end_year']) < 2022:
         request.session['summary_end_year'] = 2023
     else:
         request.session['summary_end_year'] = int(request.POST['summary_end_year'])
     return redirect('graphs_page', dataset)
+
 
 def change_model_year(request, dataset, id):
     current_model = None
@@ -77,6 +79,7 @@ def change_model_year(request, dataset, id):
 
     return redirect('graphs_page', dataset)
 
+
 def delete_model(request, dataset, id):
     current_model = None
     current_type = ""
@@ -104,6 +107,82 @@ def delete_model(request, dataset, id):
     request.session.modified = True
 
     return redirect('graphs_page', dataset)
+
+
+def clear_all_models(request, dataset):
+    model_types = ["sarima", "bayesian", "winters", "lstm"]
+
+    for model_type in model_types:
+        for model in request.session["saved_{0}".format(model_type)]:
+            if model['dataset'] == dataset:
+                request.session["saved_{0}".format(model_type)].remove(model)
+                request.session.modified = True
+
+
+
+def edit_datapoint(request, dataset, date):
+    # Check input
+    user_input = request.POST['new_volume']
+
+    try:
+        user_input = float(user_input)
+
+        if user_input < 0:
+            return redirect('edit_dataset_page', dataset)
+    except:
+        return redirect('edit_dataset_page', dataset)
+
+    clear_all_models(request, dataset)
+    request.session.modified = True
+
+    # Search for cell
+    dataset_name = "{0}_dataset_data".format(dataset.lower())
+    dataset_dates = "{0}_dataset_dates".format(dataset.lower())
+    datapoint_index = request.session[dataset_dates].index(date)
+
+    # Replace it
+    request.session[dataset_name][datapoint_index] = str(user_input)
+    request.session.modified = True
+
+    return redirect('edit_dataset_page', dataset)
+
+
+
+def edit_dataset_page(request, dataset):
+    # Load dataset
+    dataset_dates = "{0}_dataset_dates".format(dataset.lower())
+    dataset_name = "{0}_dataset_data".format(dataset.lower())
+
+    dataset_dates = request.session[dataset_dates]
+    dataset_data = request.session[dataset_name]
+
+    dataset_table = []
+    curr_date = datetime.strptime(dataset_dates[0], '%Y-%m-%d')
+
+    for i in range(len(dataset_data)):
+        year = curr_date.year
+        quarter = curr_date.month // 3 + 1
+
+        date = curr_date
+        volume = float(dataset_data[i])
+
+        value_dict = {
+            'period' : "{0} Q{1}".format(year, quarter),
+            'date' : date.strftime('%Y-%m-%d'),
+            'volume' : volume,
+        }
+
+        dataset_table.append(value_dict)
+        curr_date += relativedelta(months=3)
+
+    context = {
+        'dataset_table' : dataset_table,
+        'dataset' : dataset
+    }
+
+    return render(request, 'dashboard/edit_dataset_page.html', context)
+
+
 
 def graphs_page(request, dataset):
 
