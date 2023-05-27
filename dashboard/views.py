@@ -119,10 +119,40 @@ def clear_all_models(request, dataset):
                 request.session.modified = True
 
 
+def reload_dataset(request, dataset):
+    # Load dataset
+    dataset_dates = "{0}_dataset_dates".format(dataset.lower())
+    dataset_name = "{0}_dataset_data".format(dataset.lower())
+    dataset_data = pd.DataFrame()
+
+    request.session[dataset_dates] = []
+    request.session[dataset_name] = []
+
+    filename = "static/{0} data.csv".format(str.lower(dataset))  
+    with open(filename) as file:
+        reader = csv.reader(file)
+        readerlist = []
+        next(reader)
+        
+        for row in reader:
+            readerlist.append(row)
+
+    dataset_data = pd.DataFrame(readerlist, columns=['Date','Volume'])
+    dataset_data['Volume'] = pd.to_numeric(dataset_data['Volume'])
+    dataset_data['Date'] = pd.to_datetime(dataset_data['Date'])
+
+    request.session[dataset_dates] = dataset_data['Date'].astype(str).tolist()
+    request.session[dataset_name] = dataset_data['Volume'].tolist()
+
+    request.session.modified = True
+
+    return dataset_data
+
 
 def edit_datapoint(request, dataset, date):
     # Check input
-    user_input = request.POST['new_volume']
+    # user_input = request.POST['new_volume']
+    user_input = request.POST.get('new_volume', False)
 
     try:
         user_input = float(user_input)
@@ -146,6 +176,10 @@ def edit_datapoint(request, dataset, date):
 
     return redirect('edit_dataset_page', dataset)
 
+
+def reload_dataset_page(request, dataset):
+    reload_dataset(request, dataset)
+    return redirect('edit_dataset_page', dataset)
 
 
 def edit_dataset_page(request, dataset):
@@ -191,34 +225,7 @@ def graphs_page(request, dataset):
     dataset_name = "{0}_dataset_data".format(dataset.lower())
     dataset_data = pd.DataFrame()
 
-    if dataset_name not in request.session:
-        request.session[dataset_dates] = []
-        request.session[dataset_name] = []
-
-        filename = "static/{0} data.csv".format(str.lower(dataset))  
-        with open(filename) as file:
-            reader = csv.reader(file)
-            readerlist = []
-            next(reader)
-            
-            for row in reader:
-                readerlist.append(row)
-
-        dataset_data = pd.DataFrame(readerlist, columns=['Date','Volume'])
-        dataset_data['Volume'] = pd.to_numeric(dataset_data['Volume'])
-        dataset_data['Date'] = pd.to_datetime(dataset_data['Date'])
-
-        request.session[dataset_dates] = dataset_data['Date'].astype(str).tolist()
-        request.session[dataset_name] = dataset_data['Volume'].tolist()
-
-        request.session.modified = True
-
-    else:
-        dataset_data = pd.DataFrame({
-            'Date' : request.session[dataset_dates],
-            'Volume' : request.session[dataset_name]},)
-        dataset_data['Volume'] = pd.to_numeric(request.session[dataset_name])
-        dataset_data['Date'] = pd.to_datetime(request.session[dataset_dates])
+    dataset_data = reload_dataset(request, dataset)
 
     # Loads forms for modal
     sarima_form = SARIMA_add_form(request.POST)
