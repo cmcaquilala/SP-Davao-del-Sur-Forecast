@@ -62,6 +62,8 @@ def plot_model(dataset_data, model):
 	plt.plot(dataset_data['Date'], dataset_data['Volume'])
 	plt.plot(forecast_dates, predictions)
 	# plt.plot(test_set['Date'], predictions)
+	plt.xlim(datetime(year=int(model['display_start']) - 1, month=1, day = 1),
+	  		datetime(year=int(model['display_end']), month=10, day = 1))
 	plot_title = 'Quarterly ' + model['dataset'] + ' Production Volume of Davao del Sur Using ' + model['model_name']
 	plt.title(plot_title)
 	plt.ylabel('Volume in Tons')

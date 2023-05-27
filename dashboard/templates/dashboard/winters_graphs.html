@@ -64,6 +64,26 @@
 
             <img src="data:image/png;base64, {{model.graph|safe}}" class="img-fluid">
 
+            <form method="POST" action="{% url 'change_winters_year' dataset model.id %}">
+                {% csrf_token %}
+                <div class="row justify-content-end align-items-center mx-5">
+                    <div class="col-2">
+                        <input type="number" class="form-control" name="display_start" placeholder="Year" value="{{model.display_start}}"/>
+                    </div>
+                    <div class="col-auto">
+                        -
+                    </div>
+                    <div class="col-2">
+                        <input type="number" class="form-control" name="display_end" placeholder="Year" value="{{model.display_end}}"/>
+                    </div>
+                    <div class="col-auto align-items-center">
+                        <button class="btn btn-success" type="submit">
+                            Refresh
+                        </button>
+                    </div>
+                </div>
+            </form>
+
             {% endif %}
         </div>
 
@@ -170,6 +190,7 @@
                 {%comment%}
                 <a class="btn btn-danger" href="{% url 'delete_winters' dataset model.id %}"><i class="fa-solid fa-trash"></i> Delete</a>
                 {%endcomment%}
+                <a class="btn btn-danger" href="{% url 'delete_winters' dataset model.id %}"><i class="fa-solid fa-trash"></i> Delete</a>
                 <!-- {% comment %} <button type="button" class="btn btn-danger" href="{% url 'removeRecord' record.id %}">Save changes</button> {% endcomment %} -->
             </div>
         </div>

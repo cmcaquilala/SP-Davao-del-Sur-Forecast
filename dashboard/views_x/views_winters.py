@@ -81,9 +81,12 @@ def add_winters(request, dataset):
             model.forecasts = forecasts_table
             # model.save()
 
+            display_start = 1987
+            display_end = 2025
+
             # save into session
             model_details = {
-                'id' : model.id,
+                'id' : get_timestamp(),
                 'model_name' : result_model['model_name'],
                 'is_boxcox' : is_boxcox,
                 'lmbda' : lmbda,
@@ -95,6 +98,8 @@ def add_winters(request, dataset):
                 'lmbda' : result_model["lmbda"],
                 'forecasts' : model_predictions.tolist(),
                 'forecasts_table' : forecasts_table,
+                'display_start' : display_start,
+                'display_end' : display_end,
             }
             request.session['saved_winters'].append(model_details)
             request.session.modified = True
@@ -107,3 +112,35 @@ def add_winters(request, dataset):
 
 #     return redirect('graphs_page', dataset)
 
+def change_winters_year(request, dataset, id):
+    current_model = {}
+    for model in request.session['saved_winters']:
+        if str(model['id']) == str(id):
+            current_model = model
+    
+    display_start = int(request.POST['display_start'])
+    display_end = int(request.POST['display_end'])
+
+    if(display_start in (None, "")
+       or display_start < 1987):
+        display_start = 1987
+    if(display_end in (None, "")
+       or display_end > 2050):
+        display_end = 2025
+    if(display_end <= display_start):
+        display_start = 1987
+        display_end = 2025
+
+    current_model['display_start'] = str(display_start)
+    current_model['display_end'] = str(display_end)
+    request.session.modified = True
+
+    return redirect('graphs_page', dataset)
+
+def delete_winters(request, dataset, id):
+    for model in request.session['saved_winters']:
+        if str(model['id']) == str(id):
+            request.session['saved_winters'].remove(model)
+            request.session.modified = True
+
+    return redirect('graphs_page', dataset)
