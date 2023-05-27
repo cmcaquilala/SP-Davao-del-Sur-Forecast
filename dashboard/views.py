@@ -149,10 +149,41 @@ def reload_dataset(request, dataset):
     return dataset_data
 
 
+def add_datapoint(request, dataset):
+    # Check input
+    # user_input = request.POST['new_volume']
+    user_input = request.POST['new_volume']
+
+    try:
+        user_input = float(user_input)
+
+        if user_input < 0:
+            return redirect('edit_dataset_page', dataset)
+    except:
+        return redirect('edit_dataset_page', dataset)
+
+    clear_all_models(request, dataset)
+    request.session.modified = True
+
+    # Look for the last date
+    dataset_name = "{0}_dataset_data".format(dataset.lower())
+    dataset_dates = "{0}_dataset_dates".format(dataset.lower())
+    last_date = datetime.strptime(request.session[dataset_dates][-1], '%Y-%m-%d')
+
+    # Add 3 to last date, add volume to array
+    request.session[dataset_dates].append(
+        (last_date + relativedelta(months=3)).strftime('%Y-%m-%d')
+        )
+    request.session[dataset_name].append(user_input)
+    request.session.modified = True
+
+    return redirect('edit_dataset_page', dataset)
+
+
 def edit_datapoint(request, dataset, date):
     # Check input
     # user_input = request.POST['new_volume']
-    user_input = request.POST.get('new_volume', False)
+    user_input = request.POST['new_volume']
 
     try:
         user_input = float(user_input)
@@ -172,6 +203,21 @@ def edit_datapoint(request, dataset, date):
 
     # Replace it
     request.session[dataset_name][datapoint_index] = str(user_input)
+    request.session.modified = True
+
+    return redirect('edit_dataset_page', dataset)
+
+
+def delete_datapoint(request, dataset):
+    clear_all_models(request, dataset)
+    request.session.modified = True
+
+    dataset_name = "{0}_dataset_data".format(dataset.lower())
+    dataset_dates = "{0}_dataset_dates".format(dataset.lower())
+
+    # Replace it
+    request.session[dataset_dates].pop()
+    request.session[dataset_name].pop()
     request.session.modified = True
 
     return redirect('edit_dataset_page', dataset)
@@ -225,7 +271,17 @@ def graphs_page(request, dataset):
     dataset_name = "{0}_dataset_data".format(dataset.lower())
     dataset_data = pd.DataFrame()
 
-    dataset_data = reload_dataset(request, dataset)
+    if dataset_name not in request.session:
+        dataset_data = reload_dataset(request, dataset)
+    else:
+        dataset_data = pd.DataFrame({
+            'Date' : request.session[dataset_dates],
+            'Volume' : request.session[dataset_name],
+        })
+        dataset_data['Volume'] = pd.to_numeric(dataset_data['Volume'])
+        dataset_data['Date'] = pd.to_datetime(dataset_data['Date'])
+
+        a = dataset_data
 
     # Loads forms for modal
     sarima_form = SARIMA_add_form(request.POST)
