@@ -34,26 +34,26 @@ def index_page(request):
     return render(request, 'dashboard/index.html')
 
 def change_summary_year(request, dataset):
-    if request.POST['summary_end_year'] in (None, ""):
-        request.session['summary_end_year'] = 2025
+    if request.POST['summary_end_year'] in (None, "") or int(request.POST['summary_end_year']) < 2022:
+        request.session['summary_end_year'] = 2023
     else:
         request.session['summary_end_year'] = int(request.POST['summary_end_year'])
     return redirect('graphs_page', dataset)
 
 def change_model_year(request, dataset, id):
     current_model = None
-    # for model in request.session['saved_sarima']:
-    #     if str(model['id']) == str(id):
-    #         current_model = model
-    # for model in request.session['saved_bayesian']:
-    #     if str(model['id']) == str(id):
-    #         current_model = model
+    for model in request.session['saved_sarima']:
+        if str(model['id']) == str(id):
+            current_model = model
+    for model in request.session['saved_bayesian']:
+        if str(model['id']) == str(id):
+            current_model = model
     for model in request.session['saved_winters']:
         if str(model['id']) == str(id):
             current_model = model
-    # for model in request.session['saved_lstm']:
-    #     if str(model['id']) == str(id):
-    #         current_model = model
+    for model in request.session['saved_lstm']:
+        if str(model['id']) == str(id):
+            current_model = model
     
     if current_model == None:
         redirect('graphs_page', dataset)
@@ -79,23 +79,28 @@ def change_model_year(request, dataset, id):
 
 def delete_model(request, dataset, id):
     current_model = None
-    # for model in request.session['saved_sarima']:
-    #     if str(model['id']) == str(id):
-    #         current_model = model
-    # for model in request.session['saved_bayesian']:
-    #     if str(model['id']) == str(id):
-    #         current_model = model
+    current_type = ""
+    for model in request.session['saved_sarima']:
+        if str(model['id']) == str(id):
+            current_model = model
+            current_type = "sarima"
+    for model in request.session['saved_bayesian']:
+        if str(model['id']) == str(id):
+            current_model = model
+            current_type = "bayesian"
     for model in request.session['saved_winters']:
         if str(model['id']) == str(id):
             current_model = model
-    # for model in request.session['saved_lstm']:
-    #     if str(model['id']) == str(id):
-    #         current_model = model
+            current_type = "winters"
+    for model in request.session['saved_lstm']:
+        if str(model['id']) == str(id):
+            current_model = model
+            current_type = "lstm"
     
     if current_model == None:
         redirect('graphs_page', dataset)
 
-    request.session['saved_winters'].remove(model)
+    request.session["saved_{0}".format(current_type)].remove(model)
     request.session.modified = True
 
     return redirect('graphs_page', dataset)
@@ -137,7 +142,6 @@ def graphs_page(request, dataset):
     #     lstm_models.append(x)
 
     # collect all models saved in session
-
     if 'saved_sarima' not in request.session:
         request.session['saved_sarima'] = []
     else:
@@ -170,7 +174,7 @@ def graphs_page(request, dataset):
                 model['graph'] = plot_model(dataset_data, model)
                 lstm_models.append(model)
 
-    # summary
+    # collect summary
     summary_end_year = 2025
     if 'summary_end_year' in request.session:
         summary_end_year = int(request.session['summary_end_year'])

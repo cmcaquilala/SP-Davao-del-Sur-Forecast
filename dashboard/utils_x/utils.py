@@ -99,11 +99,11 @@ def get_merged_graphs(sarima_models, bayesian_models, winters_models, lstm_model
 
 		predictions = []
 		for i in range(no_of_periods):
-			predictions.append(model.forecasts[i]['prediction'])
+			predictions.append(model['forecasts'][i])
 
 		plt.plot(forecast_dates, predictions,label="{0} {1}".format(
-			model.get_shorthand_str(),
-			"BC " + str(model.lmbda) if model.is_boxcox else ""))
+			str(model['model_name']),
+			"BC " + str(model['lmbda']) if model['is_boxcox'] else ""))
 		plt.legend()
 
 	for model in bayesian_models:
@@ -112,13 +112,12 @@ def get_merged_graphs(sarima_models, bayesian_models, winters_models, lstm_model
 		forecast_dates = pd.date_range(start=date_start, periods=no_of_periods, freq="QS")
 
 		predictions = []
-		j = model.forecasts[0]
 		for i in range(no_of_periods):
-			predictions.append(model.forecasts[i]['prediction'])
+			predictions.append(model['forecasts'][i])
 
 		plt.plot(forecast_dates, predictions,label="{0} {1}".format(
-			model.get_shorthand_str(),
-			"BC " + str(model.lmbda) if model.is_boxcox else ""))
+			str(model['model_name']),
+			"BC " + str(model['lmbda']) if model['is_boxcox'] else ""))
 		plt.legend()
 
 	for model in winters_models:
@@ -142,11 +141,11 @@ def get_merged_graphs(sarima_models, bayesian_models, winters_models, lstm_model
 
 		predictions = []
 		for i in range(no_of_periods):
-			predictions.append(model.forecasts[i]['prediction'])
+			predictions.append(model['forecasts'][i])
 
 		plt.plot(forecast_dates, predictions,label="{0} {1}".format(
-			str(model),
-			"BC " + str(model.lmbda) if model.is_boxcox else ""))
+			str(model['model_name']),
+			"BC " + str(model['lmbda']) if model['is_boxcox'] else ""))
 		plt.legend()
 
 

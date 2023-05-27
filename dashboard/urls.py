@@ -14,15 +14,16 @@ urlpatterns = [
     path('change_model_year/<str:dataset>/<str:id>', views.change_model_year, name='change_model_year'),
     path('delete_model/<str:dataset>/<str:id>', views.delete_model, name='delete_model'),
 
-    path('add_sarima/<str:dataset>', views.add_sarima, name='add_sarima'),
-    path('add_bayesian/<str:dataset>', views.add_bayesian, name='add_bayesian'),
     path('add_winters/<str:dataset>', views.add_winters, name='add_winters'),
     path('add_lstm/<str:dataset>', views.add_lstm, name='add_lstm'),
+    
+    path('add_sarima/<str:dataset>', views.add_sarima, name='add_sarima'),
+    path('add_bayesian/<str:dataset>', views.add_bayesian, name='add_bayesian'),
 
-    path('delete_sarima/<str:dataset>/<int:id>', views.delete_sarima, name='delete_sarima'),
+    # path('delete_sarima/<str:dataset>/<int:id>', views.delete_sarima, name='delete_sarima'),
     path('delete_bayesian/<str:dataset>/<int:id>', views.delete_bayesian, name='delete_bayesian'),
     # path('delete_winters/<str:dataset>/<str:id>', views.delete_winters, name='delete_winters'),
-    path('delete_lstm/<str:dataset>/<int:id>', views.delete_lstm, name='delete_lstm'),
+    # path('delete_lstm/<str:dataset>/<int:id>', views.delete_lstm, name='delete_lstm'),
 
 ]
 

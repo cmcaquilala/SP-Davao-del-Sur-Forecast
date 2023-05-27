@@ -117,27 +117,33 @@ def model_lstm(filename, dataset_data, dataset_name, is_boxcox, lmbda):
 	predict_plot = pd.concat([predictions_df, forecasts_df], ignore_index=True)
 
 	# Plotting
-	plt.figure(figsize=[15, 7.5]); # Set dimensions for figure
-	plt.plot(dataset_data['Date'], dataset_data['Volume'])
-	plt.plot(predict_plot['Date'], predict_plot['Volume'])
-	# plt.plot(test_set['Date'], predictions)
-	plot_title = 'Quarterly ' + dataset_name + ' Production Volume of Davao del Sur Using Holt-Winters'
-	plt.title(plot_title)
-	plt.ylabel('Volume in Tons')
-	plt.xlabel('Date')
-	plt.xticks(rotation=45)
-	plt.grid(True)
+	# plt.figure(figsize=[15, 7.5]); # Set dimensions for figure
+	# plt.plot(dataset_data['Date'], dataset_data['Volume'])
+	# plt.plot(predict_plot['Date'], predict_plot['Volume'])
+	# # plt.plot(test_set['Date'], predictions)
+	# plot_title = 'Quarterly ' + dataset_name + ' Production Volume of Davao del Sur Using Holt-Winters'
+	# plt.title(plot_title)
+	# plt.ylabel('Volume in Tons')
+	# plt.xlabel('Date')
+	# plt.xticks(rotation=45)
+	# plt.grid(True)
 
-	filename = "models/{0} {1} {2} {3}.png".format(
-		dataset_name,
-		"Holt-Winters",
-		"BC" + str(lmbda) if is_boxcox else "",
-		get_timestamp(),
-	)
-	plt.savefig("static/images/" + filename, format = "png")
+	# filename = "models/{0} {1} {2} {3}.png".format(
+	# 	dataset_name,
+	# 	"Holt-Winters",
+	# 	"BC" + str(lmbda) if is_boxcox else "",
+	# 	get_timestamp(),
+	# )
+	# plt.savefig("static/images/" + filename, format = "png")
 	graph = get_graph()
 
+	model_name = 'LSTM'
+
+	predictions = predictions.values.tolist()
+	forecasts = forecasts.values.tolist()
+
 	return {
+		"model_name" : model_name,
 		"graph" : graph,
 		"filename" : filename,
 		"predictions" : predictions,
