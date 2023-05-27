@@ -81,10 +81,10 @@ def graphs_page(request, dataset):
     if 'saved_winters' not in request.session:
         request.session['saved_winters'] = []
     else:
-        test = request.session['saved_winters']
         for model in request.session['saved_winters']:
-            model['graph'] = plot_model(dataset_data, model)
-            winters_models.append(model)
+            if model['dataset'] == dataset:
+                model['graph'] = plot_model(dataset_data, model)
+                winters_models.append(model)
 
     # summary
     summary_end_year = 2025

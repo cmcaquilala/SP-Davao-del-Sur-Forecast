@@ -79,7 +79,7 @@
 
 <!-- Summary Modal -->
 
-<div class="modal modal-lg fade" id="summary" aria-labelledby="summary" aria-hidden="true">
+<div class="modal modal-xl fade" id="summary" aria-labelledby="summary" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
 
         <div class="modal-content">
@@ -96,6 +96,7 @@
                         <th>BIC</th>
                         <th>MSE</th>
                         <th>RMSE</th>
+                        <th>MAD</th>
                         <th>MAPE</th>
                     </thead>
                     <tbody>
@@ -109,6 +110,7 @@
                             <td>{{model.bic | intcomma}}</td>
                             <td>{{model.mse | intcomma}}</td>
                             <td>{{model.rmse | intcomma}}</td>
+                            <td>{{model.mad | intcomma}}</td>
                             <td>{{model.mape | intcomma}}</td>
                         </tr>
                         {% endfor %}
@@ -122,12 +124,13 @@
                             <td>{{model.bic | intcomma}}</td>
                             <td>{{model.mse | intcomma}}</td>
                             <td>{{model.rmse | intcomma}}</td>
+                            <td>{{model.mad | intcomma}}</td>
                             <td>{{model.mape | intcomma}}</td>
                         </tr>
                         {% endfor %}
                         {% for model in winters_models %}
                         <tr>
-                            <td>{{model}}
+                            <td>{{model.model_name}}
                                 {% if model.is_boxcox %}
                                 <p class="my-0">BoxCox, Lambda = {{model.lmbda}}</p>
                                 {% endif %}
@@ -135,6 +138,7 @@
                             <td>--</td>
                             <td>{{model.mse | intcomma}}</td>
                             <td>{{model.rmse | intcomma}}</td>
+                            <td>{{model.mad | intcomma}}</td>
                             <td>{{model.mape | intcomma}}</td>
                         </tr>
                         {% endfor %}
@@ -148,6 +152,7 @@
                             <td>--</td>
                             <td>{{model.mse | intcomma}}</td>
                             <td>{{model.rmse | intcomma}}</td>
+                            <td>{{model.mad | intcomma}}</td>
                             <td>{{model.mape | intcomma}}</td>
                         </tr>
                         {% endfor %}
