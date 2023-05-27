@@ -104,7 +104,7 @@
                     <tbody>
                         {% for model in sarima_models %}
                         <tr>
-                            <td>{{model.get_shorthand_str}}<sub>{{model.m_param}}</sub>
+                            <td>{{model.model_name}}<sub>{{model.m_param}}</sub>
                                 {% if model.is_boxcox %}
                                 <p class="my-0">BoxCox, Lambda = {{model.lmbda}}</p>
                                 {% endif %}

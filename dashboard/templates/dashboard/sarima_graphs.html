@@ -95,7 +95,29 @@
 
             {% if model.graph %}
 
-            <img src="static/images/{{model.graph}}" class="img-fluid">
+            <!-- <img src="static/images/{{model.graph}}" class="img-fluid"> -->
+
+            <img src="data:image/png;base64, {{model.graph|safe}}" class="img-fluid">
+
+            <form method="POST" action="{% url 'change_model_year' dataset model.id %}">
+                {% csrf_token %}
+                <div class="row justify-content-end align-items-center mx-5">
+                    <div class="col-2">
+                        <input type="number" class="form-control" name="display_start" placeholder="Year" value="{{model.display_start}}"/>
+                    </div>
+                    <div class="col-auto">
+                        -
+                    </div>
+                    <div class="col-2">
+                        <input type="number" class="form-control" name="display_end" placeholder="Year" value="{{model.display_end}}"/>
+                    </div>
+                    <div class="col-auto align-items-center">
+                        <button class="btn btn-success" type="submit">
+                            Refresh
+                        </button>
+                    </div>
+                </div>
+            </form>
 
             {% endif %}
         </div>
@@ -103,7 +125,7 @@
         <div class="col">
             <div class="row gx-1">
                 <div class="col">
-                    <h4>{{model.get_shorthand_str}}<sub>{{model.m_param}}</sub></h4>
+                    <h4>{{model.model_name}}</h4>
                 </div>
                 <div class="col-auto">
                     <a class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#forecastssarima{{model.id}}">Forecasts</a>
@@ -170,7 +192,7 @@
                         <th>Error</th>
                     </thead>
                     <tbody>
-                        {% for item in model.forecasts %}
+                        {% for item in model.forecasts_table %}
                         <tr>
                             <td>
                                 {{item.period}}
@@ -218,7 +240,7 @@
             
             <div class="modal-footer">
                 <button type="button" class="btn btn-outline-dark" data-bs-dismiss="modal">Cancel</button>
-                <a class="btn btn-danger" href="{% url 'delete_sarima' dataset model.id %}"><i class="fa-solid fa-trash"></i> Delete</a>
+                <a class="btn btn-danger" href="{% url 'delete_model' dataset model.id %}"><i class="fa-solid fa-trash"></i> Delete</a>
                 <!-- {% comment %} <button type="button" class="btn btn-danger" href="{% url 'removeRecord' record.id %}">Save changes</button> {% endcomment %} -->
             </div>
         </div>

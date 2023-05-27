@@ -41,27 +41,28 @@ def add_sarima(request, dataset):
             is_boxcox = request.POST.get('is_boxcox', False)
             lmbda = 0 if (request.POST["lmbda"] == "" or request.POST["lmbda"] == None) else float(request.POST["lmbda"])
 
-            sarima_model = model_sarima(dataset_data, dataset, my_order, my_seasonal_order, is_boxcox, lmbda)
+            result_model = model_sarima(dataset_data, dataset, my_order, my_seasonal_order, is_boxcox, lmbda)
 
             model.dataset = dataset
-            # model.graph = sarima_model["graph"]
-            # model.graph = sarima_model["filename"]
-            model.bic = sarima_model["bic"]
-            model.mse = sarima_model["mse"]
-            model.rmse = sarima_model["rmse"]
-            model.mape = sarima_model["mape"]
-            model.mad = sarima_model["mad"]
-            model.lmbda = sarima_model["lmbda"]
+            # model.graph = result_model["graph"]
+            # model.graph = result_model["filename"]
+            model.bic = result_model["bic"]
+            model.mse = result_model["mse"]
+            model.rmse = result_model["rmse"]
+            model.mape = result_model["mape"]
+            model.mad = result_model["mad"]
+            model.lmbda = result_model["lmbda"]
 
-            model_forecasts = []
-            model_predictions = sarima_model["predictions"] + sarima_model["forecasts"]
+            forecasts_table = []
+            # model_predictions = result_model["predictions"] + result_model["forecasts"]
+            model_predictions = np.concatenate([result_model["predictions"], result_model["forecasts"]])
 
-            curr_date = pd.to_datetime(sarima_model["test_set"]['Date'].values[0])
+            curr_date = pd.to_datetime(result_model["test_set"]['Date'].values[0])
             for i in range(len(model_predictions)):
                 year = curr_date.year
                 quarter = curr_date.month // 3 + 1
 
-                actual = sarima_model["test_set"]['Volume'].values[i] if i < len(sarima_model["test_set"]['Volume'].values) else 0
+                actual = result_model["test_set"]['Volume'].values[i] if i < len(result_model["test_set"]['Volume'].values) else 0
                 error = actual - model_predictions[i] if actual != 0 else 0
 
                 value_dict = {
@@ -70,17 +71,48 @@ def add_sarima(request, dataset):
                     'prediction' : model_predictions[i],
                     'error' : error,
                 }
-                model_forecasts.append(value_dict)
+                forecasts_table.append(value_dict)
                 curr_date += relativedelta(months=3)
             
-            model.forecasts = model_forecasts
-            model.save()
+            model.forecasts = forecasts_table
+            # model.save()
+
+            display_start = 1987
+            display_end = 2025
+
+            # save into session
+            model_details = {
+                'id' : get_timestamp(),
+                'model_name' : result_model['model_name'],
+                'is_boxcox' : is_boxcox,
+                'lmbda' : lmbda,
+                'dataset' : dataset,
+                'p_param' : request.POST['p_param'],
+                'd_param' : request.POST['d_param'],
+                'q_param' : request.POST['q_param'],
+                'sp_param' : request.POST['sp_param'],
+                'sd_param' : request.POST['sd_param'],
+                'sq_param' : request.POST['sq_param'],
+                'm_param' : request.POST['m_param'],
+                'bic' : result_model["bic"],
+                'mse' : result_model["mse"],
+                'rmse' : result_model["rmse"],
+                'mape' : result_model["mape"],
+                'mad' : result_model["mad"],
+                'lmbda' : result_model["lmbda"],
+                'forecasts' : model_predictions.tolist(),
+                'forecasts_table' : forecasts_table,
+                'display_start' : display_start,
+                'display_end' : display_end,
+            }
+            request.session['saved_sarima'].append(model_details)
+            request.session.modified = True
 
     return redirect('graphs_page', dataset)
 
-def delete_sarima(request, dataset, id):
-    model = SARIMAModel.objects.get(id=id)
-    model.delete()
+# def delete_sarima(request, dataset, id):
+#     model = SARIMAModel.objects.get(id=id)
+#     model.delete()
 
-    return redirect('graphs_page', dataset)
+#     return redirect('graphs_page', dataset)
 

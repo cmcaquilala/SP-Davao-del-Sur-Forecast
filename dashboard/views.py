@@ -128,6 +128,9 @@ def reload_dataset(request, dataset):
     request.session[dataset_dates] = []
     request.session[dataset_name] = []
 
+    clear_all_models(request, dataset)
+    request.session.modified = True
+
     filename = "static/{0} data.csv".format(str.lower(dataset))  
     with open(filename) as file:
         reader = csv.reader(file)
@@ -272,6 +275,10 @@ def graphs_page(request, dataset):
     dataset_data = pd.DataFrame()
 
     if dataset_name not in request.session:
+        request.session['saved_sarima'] = []
+        request.session['saved_bayesian'] = []
+        request.session['saved_winters'] = []
+        request.session['saved_lstm'] = []
         dataset_data = reload_dataset(request, dataset)
     else:
         dataset_data = pd.DataFrame({
@@ -280,8 +287,6 @@ def graphs_page(request, dataset):
         })
         dataset_data['Volume'] = pd.to_numeric(dataset_data['Volume'])
         dataset_data['Date'] = pd.to_datetime(dataset_data['Date'])
-
-        a = dataset_data
 
     # Loads forms for modal
     sarima_form = SARIMA_add_form(request.POST)
