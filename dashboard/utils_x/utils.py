@@ -67,7 +67,7 @@ def get_merged_graphs(sarima_models, bayesian_models, winters_models, lstm_model
 	date_start = test_set['Date'][test_set.index.start]
 	no_of_periods = (end_year - 2020 + 1) * 4
 
-	if (len(sarima_models) + len(bayesian_models) < 1):
+	if (len(sarima_models) + len(bayesian_models) + len(winters_models) + len(lstm_models) < 1):
 		return get_graph()
 
 	for model in sarima_models:
@@ -136,15 +136,18 @@ def get_MSE(actual, predictions):
 	for i in range(actual.size):
 		total += (actual[i] - predictions[i])**2
 
-	return total / (actual.size)
+	return total / (actual.size - 1)
 
 def get_RMSE(actual, predictions):
+	return math.sqrt(get_MSE(actual, predictions))
+
+def get_MAD(actual,predictions):
 	total = 0
 
 	for i in range(actual.size):
-		total += (actual[i] - predictions[i])**2
+		total += math.fabs(actual[i] - predictions[i])
 
-	return math.sqrt(total / (actual.size - 1))
+	return total / (actual.size)
 
 def get_MAPE(actual, predictions):
 	total = 0

@@ -51,7 +51,6 @@ def model_winters(filename, dataset_data, dataset_name, is_boxcox, lmbda):
 	predictions = pd.Series(predictions, index=test_set.index)
 
     # Predicting future values
-	no_of_forecasts = 12
 	forecasts = model_fit.forecast(no_of_forecasts)
 	if is_boxcox:
 		forecasts = special.inv_boxcox(forecasts, lmbda)
@@ -60,17 +59,7 @@ def model_winters(filename, dataset_data, dataset_name, is_boxcox, lmbda):
 	model_MSE = get_MSE(test_set['Volume'].values,predictions.values)
 	model_RMSE = get_RMSE(test_set['Volume'].values,predictions.values)
 	model_MAPE = get_MAPE(test_set['Volume'].values,predictions.values)
-
-	# Model Evaluation
-	# model_MSE = r_metrics[1]*r_metrics[1]
-	# model_RMSE = r_metrics[1]
-	# model_MAPE = r_metrics[4]
-	# model_BIC = r_model[15][0]
-	# model_aic = r_model[5][0]
-	# model_aicc = r_model[14][0]
-
-	# # Graph Plotting
-	# points_to_display = 100
+	model_MAD = get_MAD(test_set['Volume'].values,predictions.values)
 
 	forecast_dates = pd.date_range(test_set['Date'][test_set.index.stop-1], periods=no_of_forecasts, freq="QS")
 	predictions_df = pd.DataFrame(
@@ -112,5 +101,6 @@ def model_winters(filename, dataset_data, dataset_name, is_boxcox, lmbda):
 		"mse" : model_MSE,
 		"rmse" : model_RMSE,
 		"mape" : model_MAPE,
+		"mad" : model_MAD,
 		"lmbda" : lmbda,
 	}

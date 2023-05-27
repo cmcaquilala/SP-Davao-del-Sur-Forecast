@@ -90,18 +90,6 @@ def model_sarima(filename, dataset_data, dataset_name, my_order, my_seasonal_ord
 	# End of rpy2
 	# ----------------------
 
-
-	# Model Evaluation
-	model_MSE = r_metrics[1]*r_metrics[1]
-	model_RMSE = r_metrics[1]
-	model_MAPE = r_metrics[4]
-	model_BIC = r_model[15][0]
-	# model_aic = r_model[5][0]
-	# model_aicc = r_model[14][0]
-
-	# # Graph Plotting
-	# points_to_display = 100
-
 	predictions = []
 	forecasts = []
 
@@ -110,6 +98,15 @@ def model_sarima(filename, dataset_data, dataset_name, my_order, my_seasonal_ord
 
 	for x in r_forecasts[3]:
 		forecasts.append(x)
+
+	# Model Evaluation
+	model_MSE = r_metrics[1]*r_metrics[1]
+	model_RMSE = r_metrics[1]
+	model_MAPE = r_metrics[4]
+	model_MAD = get_MAD(test_set['Volume'].values,predictions.values)
+	model_BIC = r_model[15][0]
+	# model_aic = r_model[5][0]
+	# model_aicc = r_model[14][0]
 
 	forecast_dates = pd.date_range(test_set['Date'][test_set.index.stop-1], periods=no_of_forecasts, freq="QS")
 	predictions_df = pd.DataFrame(
@@ -154,5 +151,6 @@ def model_sarima(filename, dataset_data, dataset_name, my_order, my_seasonal_ord
 		"mse" : model_MSE,
 		"rmse" : model_RMSE,
 		"mape" : model_MAPE,
+		"mad" : model_MAD,
 		"lmbda" : lmbda,
 	}

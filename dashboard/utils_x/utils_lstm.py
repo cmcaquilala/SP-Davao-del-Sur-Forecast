@@ -76,7 +76,6 @@ def model_lstm(filename, dataset_data, dataset_name, is_boxcox, lmbda):
 		predictions = pd.Series(predictions)
 
 	# Predicting future values
-	no_of_forecasts = 12
 	forecast_results = []
 	first_eval_batch = predictions[-n_input:].to_numpy()
 	current_batch = first_eval_batch.reshape((1, n_input, n_features))
@@ -99,17 +98,7 @@ def model_lstm(filename, dataset_data, dataset_name, is_boxcox, lmbda):
 	model_MSE = get_MSE(test_set['Volume'].values,predictions.values)
 	model_RMSE = get_RMSE(test_set['Volume'].values,predictions.values)
 	model_MAPE = get_MAPE(test_set['Volume'].values,predictions.values)
-
-	# Model Evaluation
-	# model_MSE = r_metrics[1]*r_metrics[1]
-	# model_RMSE = r_metrics[1]
-	# model_MAPE = r_metrics[4]
-	# model_BIC = r_model[15][0]
-	# model_aic = r_model[5][0]
-	# model_aicc = r_model[14][0]
-
-	# # Graph Plotting
-	# points_to_display = 100
+	model_MAD = get_MAD(test_set['Volume'].values,predictions.values)
 
 	forecast_dates = pd.date_range(test_set['Date'][test_set.index.stop-1], periods=no_of_forecasts, freq="QS")
 	predictions_df = pd.DataFrame(
@@ -151,5 +140,6 @@ def model_lstm(filename, dataset_data, dataset_name, is_boxcox, lmbda):
 		"mse" : model_MSE,
 		"rmse" : model_RMSE,
 		"mape" : model_MAPE,
+		"mad" : model_MAD,
 		"lmbda" : lmbda,
 	}

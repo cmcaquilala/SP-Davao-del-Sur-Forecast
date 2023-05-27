@@ -76,10 +76,17 @@ def graphs_page(request, dataset):
     # temporary date
     test_set = dataset_data[132:]
 
-    summary_end_year = 2025
     if 'summary_end_year' in request.session:
         summary_end_year = int(request.session['summary_end_year'])
     else:
+        request.session['summary_end_year'] = summary_end_year
+
+    # error handling for end_year
+    if summary_end_year < 2023 or request.session['summary_end_year'] < 2023:
+        summary_end_year = 2023
+        request.session['summary_end_year'] = summary_end_year
+    elif summary_end_year > 2050 or request.session['summary_end_year'] > 2050:
+        summary_end_year = 2050
         request.session['summary_end_year'] = summary_end_year
 
     merged_graphs = get_merged_graphs(sarima_models, bayesian_models, winters_models, lstm_models, test_set, summary_end_year)

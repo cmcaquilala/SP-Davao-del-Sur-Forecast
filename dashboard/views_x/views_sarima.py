@@ -53,7 +53,7 @@ def add_sarima(request, dataset):
             model.mse = sarima_model["mse"]
             model.rmse = sarima_model["rmse"]
             model.mape = sarima_model["mape"]
-            model.mad = 0
+            model.mad = sarima_model["mad"]
             model.lmbda = sarima_model["lmbda"]
 
             model_forecasts = []

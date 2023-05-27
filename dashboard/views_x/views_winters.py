@@ -54,7 +54,7 @@ def add_winters(request, dataset):
             model.mse = winters_model["mse"]
             model.rmse = winters_model["rmse"]
             model.mape = winters_model["mape"]
-            model.mad = 0
+            model.mad = winters_model["mad"]
             model.lmbda = winters_model["lmbda"]
 
             model_forecasts = []

@@ -54,7 +54,7 @@ def add_lstm(request, dataset):
             model.mse = lstm_model["mse"]
             model.rmse = lstm_model["rmse"]
             model.mape = lstm_model["mape"]
-            model.mad = 0
+            model.mad = lstm_model["mad"]
             model.lmbda = lstm_model["lmbda"]
 
             model_forecasts = []

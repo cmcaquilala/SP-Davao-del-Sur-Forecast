@@ -53,7 +53,7 @@ def add_bayesian(request, dataset):
             model.mse = bayesian_model["mse"]
             model.rmse = bayesian_model["rmse"]
             model.mape = bayesian_model["mape"]
-            model.mad = 0
+            model.mad = bayesian_model["mad"]
             model.lmbda = bayesian_model["lmbda"]
 
             model_forecasts = []
