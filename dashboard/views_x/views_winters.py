@@ -112,35 +112,10 @@ def add_winters(request, dataset):
 
 #     return redirect('graphs_page', dataset)
 
-def change_winters_year(request, dataset, id):
-    current_model = {}
-    for model in request.session['saved_winters']:
-        if str(model['id']) == str(id):
-            current_model = model
-    
-    display_start = int(request.POST['display_start'])
-    display_end = int(request.POST['display_end'])
+# def delete_winters(request, dataset, id):
+#     for model in request.session['saved_winters']:
+#         if str(model['id']) == str(id):
+#             request.session['saved_winters'].remove(model)
+#             request.session.modified = True
 
-    if(display_start in (None, "")
-       or display_start < 1987):
-        display_start = 1987
-    if(display_end in (None, "")
-       or display_end > 2050):
-        display_end = 2025
-    if(display_end <= display_start):
-        display_start = 1987
-        display_end = 2025
-
-    current_model['display_start'] = str(display_start)
-    current_model['display_end'] = str(display_end)
-    request.session.modified = True
-
-    return redirect('graphs_page', dataset)
-
-def delete_winters(request, dataset, id):
-    for model in request.session['saved_winters']:
-        if str(model['id']) == str(id):
-            request.session['saved_winters'].remove(model)
-            request.session.modified = True
-
-    return redirect('graphs_page', dataset)
+#     return redirect('graphs_page', dataset)

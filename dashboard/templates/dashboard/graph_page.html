@@ -113,6 +113,10 @@
                             <td>{{model.mad | intcomma}}</td>
                             <td>{{model.mape | intcomma}}</td>
                         </tr>
+                        {% empty %}
+                        <tr>
+                            <td class="text-secondary" colspan="6">No SARIMA models.</td>
+                        </tr>
                         {% endfor %}
                         {% for model in bayesian_models %}
                         <tr>
@@ -126,6 +130,10 @@
                             <td>{{model.rmse | intcomma}}</td>
                             <td>{{model.mad | intcomma}}</td>
                             <td>{{model.mape | intcomma}}</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td class="text-secondary" colspan="6">No Bayesian SARIMA models.</td>
                         </tr>
                         {% endfor %}
                         {% for model in winters_models %}
@@ -141,6 +149,10 @@
                             <td>{{model.mad | intcomma}}</td>
                             <td>{{model.mape | intcomma}}</td>
                         </tr>
+                        {% empty %}
+                        <tr>
+                            <td class="text-secondary" colspan="6">No Holt-Winters models.</td>
+                        </tr>
                         {% endfor %}
                         {% for model in lstm_models %}
                         <tr>
@@ -154,6 +166,10 @@
                             <td>{{model.rmse | intcomma}}</td>
                             <td>{{model.mad | intcomma}}</td>
                             <td>{{model.mape | intcomma}}</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td class="text-secondary" colspan="6">No LSTM models.</td>
                         </tr>
                         {% endfor %}
                     </tbody>

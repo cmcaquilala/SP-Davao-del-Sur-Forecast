@@ -40,6 +40,66 @@ def change_summary_year(request, dataset):
         request.session['summary_end_year'] = int(request.POST['summary_end_year'])
     return redirect('graphs_page', dataset)
 
+def change_model_year(request, dataset, id):
+    current_model = None
+    # for model in request.session['saved_sarima']:
+    #     if str(model['id']) == str(id):
+    #         current_model = model
+    # for model in request.session['saved_bayesian']:
+    #     if str(model['id']) == str(id):
+    #         current_model = model
+    for model in request.session['saved_winters']:
+        if str(model['id']) == str(id):
+            current_model = model
+    # for model in request.session['saved_lstm']:
+    #     if str(model['id']) == str(id):
+    #         current_model = model
+    
+    if current_model == None:
+        redirect('graphs_page', dataset)
+
+    display_start = int(request.POST['display_start'])
+    display_end = int(request.POST['display_end'])
+
+    if(display_start in (None, "")
+       or display_start < 1987):
+        display_start = 1987
+    if(display_end in (None, "")
+       or display_end > 2050):
+        display_end = 2025
+    if(display_end <= display_start):
+        display_start = 1987
+        display_end = 2025
+
+    current_model['display_start'] = str(display_start)
+    current_model['display_end'] = str(display_end)
+    request.session.modified = True
+
+    return redirect('graphs_page', dataset)
+
+def delete_model(request, dataset, id):
+    current_model = None
+    # for model in request.session['saved_sarima']:
+    #     if str(model['id']) == str(id):
+    #         current_model = model
+    # for model in request.session['saved_bayesian']:
+    #     if str(model['id']) == str(id):
+    #         current_model = model
+    for model in request.session['saved_winters']:
+        if str(model['id']) == str(id):
+            current_model = model
+    # for model in request.session['saved_lstm']:
+    #     if str(model['id']) == str(id):
+    #         current_model = model
+    
+    if current_model == None:
+        redirect('graphs_page', dataset)
+
+    request.session['saved_winters'].remove(model)
+    request.session.modified = True
+
+    return redirect('graphs_page', dataset)
+
 def graphs_page(request, dataset):
     # Load dataset
     filename = "static/{0} data.csv".format(str.lower(dataset))  
@@ -78,6 +138,22 @@ def graphs_page(request, dataset):
 
     # collect all models saved in session
 
+    if 'saved_sarima' not in request.session:
+        request.session['saved_sarima'] = []
+    else:
+        for model in request.session['saved_sarima']:
+            if model['dataset'] == dataset:
+                model['graph'] = plot_model(dataset_data, model)
+                sarima_models.append(model)
+
+    if 'saved_bayesian' not in request.session:
+        request.session['saved_bayesian'] = []
+    else:
+        for model in request.session['saved_bayesian']:
+            if model['dataset'] == dataset:
+                model['graph'] = plot_model(dataset_data, model)
+                bayesian_models.append(model)
+
     if 'saved_winters' not in request.session:
         request.session['saved_winters'] = []
     else:
@@ -85,6 +161,14 @@ def graphs_page(request, dataset):
             if model['dataset'] == dataset:
                 model['graph'] = plot_model(dataset_data, model)
                 winters_models.append(model)
+
+    if 'saved_lstm' not in request.session:
+        request.session['saved_lstm'] = []
+    else:
+        for model in request.session['saved_lstm']:
+            if model['dataset'] == dataset:
+                model['graph'] = plot_model(dataset_data, model)
+                lstm_models.append(model)
 
     # summary
     summary_end_year = 2025
