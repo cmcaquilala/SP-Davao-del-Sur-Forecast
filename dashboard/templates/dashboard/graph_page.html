@@ -27,7 +27,7 @@
                     </div>
                     <div class="col-auto align-items-center">
                         <button class="btn btn-success" type="submit">
-                            Refresh
+                            Refresh <i class="fa-solid fa-arrows-rotate"> </i>
                         </button>
                     </div>
                 </div>
@@ -44,10 +44,10 @@
             
             <div class="row mb-4">
                 <div class="col-auto">
-                    <a class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#summary">Summary</a>
+                    <a class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#summary">Summary <i class="fa-solid fa-list"> </i></a>
                 </div>
                 <div class="col-auto">
-                    <a class="btn btn-warning btn-sm" href="{% url 'edit_dataset_page' dataset %}">Edit Dataset</a>
+                    <a class="btn btn-warning btn-sm" href="{% url 'edit_dataset_page' dataset %}">Edit Dataset <i class="fa-solid fa-pen-to-square"> </i></a>
                 </div>
             </div>
             
@@ -180,7 +180,7 @@
             </div>
             
             <div class="modal-footer">
-                <button type="button" class="btn btn-outline-dark" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-outline-dark" data-bs-dismiss="modal">Close <i class="fa-solid fa-x"> </i></button>
             </div>
         </div>
 

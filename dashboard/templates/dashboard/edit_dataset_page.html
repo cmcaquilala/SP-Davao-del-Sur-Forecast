@@ -16,7 +16,7 @@
 
     <div class="row">
         <div class="col-auto">
-            <a class="btn btn-success" href="{% url 'reload_dataset_page' dataset %}">Reload Dataset</a>
+            <a class="btn btn-success" href="{% url 'reload_dataset_page' dataset %}">Reload Dataset <i class="fa-solid fa-arrows-rotate"> </i></a>
         </div>
 
         <div class="col">
@@ -32,7 +32,7 @@
                     </div>
                     <div class="col-auto align-items-center">
                         <button class="btn btn-success" type="submit">
-                            Save
+                            Save <i class="fa-solid fa-save"> </i>
                         </button>
                     </div>
                 </div>
@@ -58,7 +58,7 @@
                     <td>{{item.period}}</td>
                     <td>{{item.volume}}</td>
                     <td class="text-end">
-                        <a class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#edit{{item.date}}">Edit</a>
+                        <a class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#edit{{item.date}}">Edit <i class="fa-solid fa-pen-to-square"> </i></a>
                     </td>
                 </tr>
 
@@ -81,8 +81,8 @@
                                 </div>
                                 
                                 <div class="modal-footer">
-                                    <button type="button" class="btn btn-outline-dark" data-bs-dismiss="modal">Cancel</button>
-                                    <button class="btn btn-primary" type="submit">Save</button>
+                                    <button type="button" class="btn btn-outline-dark" data-bs-dismiss="modal">Cancel <i class="fa-solid fa-x"> </i></button>
+                                    <button class="btn btn-primary" type="submit">Save <i class="fa-solid fa-save"> </i></button>
                                     <!-- {% comment %} <button type="button" class="btn btn-danger" href="{% url 'removeRecord' record.id %}">Save changes</button> {% endcomment %} -->
                                 </div>
                             </form>
@@ -94,8 +94,8 @@
                 {% endfor %}
                 <tr>
                     <td class="text-center" colspan="3">
-                        <a class="btn btn-success" data-bs-toggle="modal" data-bs-target="#add_datapoint">Add a record</a>
-                        <a class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#delete_datapoint">Delete last record</a>
+                        <a class="btn btn-success" data-bs-toggle="modal" data-bs-target="#add_datapoint">Add a record <i class="fa-solid fa-plus"> </i></a>
+                        <a class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#delete_datapoint">Delete last record <i class="fa-solid fa-trash"> </i></a>
                     </td>
 
                 </tr>
@@ -126,8 +126,8 @@
                 </div>
                 
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-outline-dark" data-bs-dismiss="modal">Cancel</button>
-                    <button class="btn btn-primary" type="submit">Save</button>
+                    <button type="button" class="btn btn-outline-dark" data-bs-dismiss="modal">Cancel <i class="fa-solid fa-x"> </i></button>
+                    <button class="btn btn-primary" type="submit">Save <i class="fa-solid fa-save"> </i></button>
                     <!-- {% comment %} <button type="button" class="btn btn-danger" href="{% url 'removeRecord' record.id %}">Save changes</button> {% endcomment %} -->
                 </div>
             </form>
@@ -153,8 +153,8 @@
             </div>
             
             <div class="modal-footer">
-                <button type="button" class="btn btn-outline-dark" data-bs-dismiss="modal">Cancel</button>
-                <a class="btn btn-danger" href="{% url 'delete_datapoint' dataset %}">Delete</a>
+                <button type="button" class="btn btn-outline-dark" data-bs-dismiss="modal">Cancel <i class="fa-solid fa-x"> </i></button>
+                <a class="btn btn-danger" href="{% url 'delete_datapoint' dataset %}">Delete <i class="fa-solid fa-trash"> </i></a>
             </div>
         </div>
 

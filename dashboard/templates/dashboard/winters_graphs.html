@@ -7,7 +7,7 @@
     </div>
 
     <div class="col-auto"> 
-        <a class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addwinters">Add Model</a>
+        <a class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addwinters">Add Model <i class="fa-solid fa-plus"> </i></a>
     </div>
 </div>
 
@@ -50,8 +50,8 @@
                 </div>
                 
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-outline-dark" data-bs-dismiss="modal">Close</button>
-                    <button type="Submit" class="btn btn-primary" >Save changes</button>
+                    <button type="button" class="btn btn-outline-dark" data-bs-dismiss="modal">Close <i class="fa-solid fa-x"> </i></button>
+                    <button type="Submit" class="btn btn-primary" >Save changes <i class="fa-solid fa-save"> </i></button>
                 </div>
             </div>
         </form>
@@ -91,7 +91,7 @@
                     </div>
                     <div class="col-auto align-items-center">
                         <button class="btn btn-success" type="submit">
-                            Refresh
+                            Refresh <i class="fa-solid fa-arrows-rotate"> </i>
                         </button>
                     </div>
                 </div>
@@ -106,10 +106,10 @@
                     <h4>{{model.model_name}}</h4>
                 </div>
                 <div class="col-auto">
-                    <a class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#forecastswinters{{model.id}}">Forecasts</a>
+                    <a class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#forecastswinters{{model.id}}">Forecasts <i class="fa-solid fa-chart-line"> </i></a>
                 </div>
                 <div class="col-auto">
-                    <a class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deletewinters{{model.id}}">Delete</a>
+                    <a class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deletewinters{{model.id}}">Delete <i class="fa-solid fa-trash"> </i></a>
                 </div>
             </div>
             {% if model.is_boxcox %}

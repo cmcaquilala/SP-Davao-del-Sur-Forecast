@@ -7,7 +7,7 @@
     </div>
 
     <div class="col-auto"> 
-        <a class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addbayesian">Add Model</a>
+        <a class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addbayesian">Add Model <i class="fa-solid fa-plus"> </i></a>
     </div>
 </div>
 
@@ -72,8 +72,8 @@
                 </div>
                 
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-outline-dark" data-bs-dismiss="modal">Close</button>
-                    <button type="Submit" class="btn btn-primary" >Save changes</button>
+                    <button type="button" class="btn btn-outline-dark" data-bs-dismiss="modal">Close <i class="fa-solid fa-x"> </i></button>
+                    <button type="Submit" class="btn btn-primary" >Save changes <i class="fa-solid fa-save"> </i></button>
                 </div>
             </div>
         </form>
@@ -95,7 +95,29 @@
 
             {% if model.graph %}
 
-            <img src="static/images/{{model.graph}}" class="img-fluid">
+            <!-- <img src="static/images/{{model.graph}}" class="img-fluid"> -->
+
+            <img src="data:image/png;base64, {{model.graph|safe}}" class="img-fluid">
+
+            <form method="POST" action="{% url 'change_model_year' dataset model.id %}">
+                {% csrf_token %}
+                <div class="row justify-content-end align-items-center mx-5">
+                    <div class="col-2">
+                        <input type="number" class="form-control" name="display_start" placeholder="Year" value="{{model.display_start}}"/>
+                    </div>
+                    <div class="col-auto">
+                        -
+                    </div>
+                    <div class="col-2">
+                        <input type="number" class="form-control" name="display_end" placeholder="Year" value="{{model.display_end}}"/>
+                    </div>
+                    <div class="col-auto align-items-center">
+                        <button class="btn btn-success" type="submit">
+                            Refresh <i class="fa-solid fa-arrows-rotate"> </i>
+                        </button>
+                    </div>
+                </div>
+            </form>
 
             {% endif %}
         </div>
@@ -106,10 +128,10 @@
                     <h4>{{model.get_shorthand_str}}<sub>{{model.m_param}}</sub></h4>
                 </div>
                 <div class="col-auto">
-                    <a class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#forecastsbayesian{{model.id}}">Forecasts</a>
+                    <a class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#forecastsbayesian{{model.id}}">Forecasts <i class="fa-solid fa-chart-line"> </i></a>
                 </div>
                 <div class="col-auto">
-                    <a class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deletebayesian{{model.id}}">Delete</a>
+                    <a class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deletebayesian{{model.id}}">Delete <i class="fa-solid fa-trash"> </i></a>
                 </div>
             </div>
             {% if model.is_boxcox %}
