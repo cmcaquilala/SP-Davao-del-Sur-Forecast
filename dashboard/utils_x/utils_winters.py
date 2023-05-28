@@ -33,12 +33,12 @@ def model_winters(dataset_data, dataset_name, train_set_idx, trend, seasonal, da
 	test_set = dataset_data[train_set_size:]
 
 	# checking inputs
-	if trend.lower() in ("mult","multiplicative"):
+	if trend.lower() in ("mul","multiplicative"):
 		trend = "mul"
 	else:
 		trend = "add"
 
-	if seasonal.lower() in ("mult","multiplicative"):
+	if seasonal.lower() in ("mul","multiplicative"):
 		seasonal = "mul"
 	else:
 		seasonal = "add"

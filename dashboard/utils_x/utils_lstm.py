@@ -72,7 +72,8 @@ def model_lstm(dataset_data, dataset_name, train_set_idx, n_inputs, n_epochs, n_
 	model.add(Dense(1))
 	model.compile(optimizer='adam', loss='mse')
 
-	model.fit(generator,epochs=n_epochs)
+	early_stop = tf.keras.callbacks.EarlyStopping(monitor='loss', patience=5)
+	model.fit(generator,epochs=n_epochs,callbacks=early_stop)
 
 	# Fitting with test set
 	transf_prediction_results = []
