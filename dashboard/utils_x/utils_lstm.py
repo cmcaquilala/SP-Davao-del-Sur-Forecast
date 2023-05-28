@@ -32,52 +32,66 @@ import os
 tf.keras.utils.set_random_seed(5)
 os.environ['PYTHONHASHSEED']=str(5)
 
-def model_lstm(dataset_data, dataset_name, train_set_idx, is_boxcox, lmbda):
+def model_lstm(dataset_data, dataset_name, train_set_idx, n_inputs, n_epochs, n_units, is_boxcox, lmbda):
 	# Initialization
 	# 28*4 forecasts = up to 2050
+	activation = 'relu'
 	test_set_date = dataset_data.iloc[-1]['Date']
 	no_of_forecasts = (2050 - (test_set_date.year + 1) + 1) * 4
 	forecast_dates = pd.date_range(start=test_set_date, periods=no_of_forecasts, freq="QS")
-
-	n_input = 4
-	n_features = 1
 
 	train_set_size = train_set_idx
 	train_set = dataset_data[0:train_set_size]
 	test_set = dataset_data[train_set_size:]
 
-	# Creating Holt-Winters Model
-
+	# Creating LSTM Model
     # Transforming
+	lmbda = stats.boxcox(dataset_data["Volume"])[1]
+
 	if is_boxcox:
-		lmbda = stats.boxcox(dataset_data["Volume"])[1]
-		df_data = stats.boxcox(train_set['Volume'], lmbda=lmbda)
+		if lmbda == 0:
+			lmbda = stats.boxcox(dataset_data["Volume"])[1]
+		transf_volume = stats.boxcox(train_set['Volume'], lmbda=lmbda)
+		df_data = pd.DataFrame({
+			'Date' : train_set['Date'],
+			'Volume' : transf_volume,
+		})
 	else:
-		df_data = train_set['Volume']
+		df_data = train_set
+
+	scaler = MinMaxScaler()
+	scaler.fit(df_data.set_index('Date'))
+	scaled_train = scaler.transform(df_data.set_index('Date'))
+	scaled_test = scaler.transform(df_data.set_index('Date'))
+	df_data = scaled_train
 
 	# Creating Model
-	generator = TimeseriesGenerator(df_data, df_data, length=n_input, batch_size=1)
+	generator = TimeseriesGenerator(df_data, df_data, length=n_inputs, batch_size=1)
 	model = Sequential()
-	model.add(LSTM(100, activation='relu', input_shape=(n_input, n_features)))
+	model.add(LSTM(n_units, activation=activation, input_shape=(n_inputs, 1)))
 	model.add(Dense(1))
 	model.compile(optimizer='adam', loss='mse')
 
-	model.fit(generator,epochs=50)
+	model.fit(generator,epochs=n_epochs)
 
 	# Fitting with test set
-	prediction_results = []
-	first_eval_batch = df_data[-n_input:]
-	current_batch = first_eval_batch.reshape((1, n_input, n_features))
+	transf_prediction_results = []
+	first_eval_batch = df_data[-n_inputs:]
+	print(type(first_eval_batch))
+	current_batch = first_eval_batch.reshape((1, n_inputs, 1))
 
 	for i in range(len(test_set)):
 		# get the prediction value for the first batch
 		current_pred = model.predict(current_batch)[0]
 		
 		# append the prediction into the array
-		prediction_results.append(current_pred[0]) 
+		transf_prediction_results.append(current_pred) 
 		
 		# use the prediction to update the batch and remove the first value
 		current_batch = np.append(current_batch[:,1:,:],[[current_pred]],axis=1)
+
+	prediction_results = scaler.inverse_transform(transf_prediction_results)
+	prediction_results = [item[0] for item in prediction_results]
 
 	predictions = pd.Series(prediction_results, index = test_set['Date'])
 	if is_boxcox:
@@ -86,22 +100,26 @@ def model_lstm(dataset_data, dataset_name, train_set_idx, is_boxcox, lmbda):
 
 	# Predicting future values
 	forecast_results = []
-	first_eval_batch = predictions[-n_input:].to_numpy()
-	current_batch = first_eval_batch.reshape((1, n_input, n_features))
+	first_eval_batch = np.array(transf_prediction_results[-n_inputs:])
+	print(type(first_eval_batch))
+	current_batch = first_eval_batch.reshape((1, n_inputs, 1))
 
 	for i in range(no_of_forecasts):
 		# get the prediction value for the first batch
 		current_pred = model.predict(current_batch)[0]
 		
 		# append the prediction into the array
-		forecast_results.append(current_pred[0]) 
+		forecast_results.append(current_pred) 
 		
 		# use the prediction to update the batch and remove the first value
 		current_batch = np.append(current_batch[:,1:,:],[[current_pred]],axis=1)
 
+	forecast_results = scaler.inverse_transform(forecast_results)
+	forecast_results = [item[0] for item in forecast_results]
+
 	forecasts = pd.Series(forecast_results)
-	# if is_box_cox:
-	#   forecasts = special.inv_boxcox(forecasts, lmbda)
+	if is_boxcox:
+		forecasts = special.inv_boxcox(forecasts, lmbda)
 
     # Model Evaluation
 	model_MSE = get_MSE(test_set['Volume'].values,predictions.values)

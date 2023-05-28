@@ -11,7 +11,7 @@
     </div>
 </div>
 
-<!-- Add Winters -->
+<!-- Add LSTM -->
 <div class="modal fade" id="addlstm">
     <div class="modal-dialog modal-dialog-scrollable modal-lg">
         <form method="POST" action="{% url 'add_lstm' dataset %}" enctype="multipart/form-data">
@@ -23,6 +23,18 @@
                 </div>
 
                 <div class="modal-body p-3">
+
+                    <div class="row">
+                        <div class="col-3">
+                            {{ lstm_form.n_units | as_crispy_field }}
+                        </div>
+                        <div class="col-3">
+                            {{ lstm_form.n_epochs | as_crispy_field }}
+                        </div>
+                        <div class="col-3">
+                            {{ lstm_form.n_inputs | as_crispy_field }}
+                        </div>
+                    </div>
 
                     <div class="row">
                         <b class="mb-2">Transformation:</b>
@@ -44,7 +56,7 @@
         </form>
     </div>
 </div>
-<!-- End Add Winters -->
+<!-- End Add LSTM -->
 
 {% for model in lstm_models %}
 <!-- Model Display -->
@@ -109,6 +121,9 @@
             {% if model.is_boxcox %}
             <p><b>Lambda:</b> {{model.lmbda | intcomma}}</p>
             {% endif %}
+            <p><b>Units:</b> {{model.n_units | intcomma}}</p>
+            <p><b>Epochs:</b> {{model.n_epochs | intcomma}}</p>
+            <p><b>Window Size:</b> {{model.n_inputs | intcomma}}</p>
             <p><b>MSE:</b> {{model.mse | intcomma}}</p>
             <p><b>RMSE:</b> {{model.rmse | intcomma}}</p>
             <p><b>MAD:</b> {{model.mad | intcomma}}</p>

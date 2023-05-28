@@ -46,7 +46,8 @@ def model_winters(dataset_data, dataset_name, train_set_idx, trend, seasonal, da
 	# Creating Holt-Winters Model
     # Transforming
 	if is_boxcox:
-		lmbda = stats.boxcox(dataset_data["Volume"])[1]
+		if lmbda == 0:
+			lmbda = stats.boxcox(dataset_data["Volume"])[1]
 		df_data = stats.boxcox(train_set['Volume'], lmbda=lmbda)
 	else:
 		df_data = train_set['Volume']

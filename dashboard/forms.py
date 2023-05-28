@@ -53,8 +53,11 @@ class LSTM_add_form(ModelForm):
 
     class Meta:
         model = LSTMModel
-        fields = ['is_boxcox','lmbda']
+        fields = ['is_boxcox','lmbda','n_inputs','n_epochs','n_units',]
         labels = {
             'is_boxcox' : 'Use Box Cox Transformation',
             'lmbda' : 'Lambda (default: auto)',
+            'n_inputs' : 'Window Size',
+            'n_epochs' : 'Epochs',
+            'n_units' : 'Number of Units',
         }

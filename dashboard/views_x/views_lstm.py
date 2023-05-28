@@ -41,9 +41,12 @@ def add_lstm(request, dataset):
             # my_seasonal_order = (int(request.POST["sp_param"]), int(request.POST["sd_param"]), int(request.POST["sq_param"]), int(request.POST["m_param"]))
             is_boxcox = request.POST.get('is_boxcox', False)
             lmbda = 0 if (request.POST["lmbda"] == "" or request.POST["lmbda"] == None) else float(request.POST["lmbda"])
+            n_inputs = int(request.POST['n_inputs'])
+            n_epochs = int(request.POST['n_epochs'])
+            n_units = int(request.POST['n_units'])
 
             test_set_index = request.session['{0}_test_set_index'.format(dataset.lower())]
-            result_model = model_lstm(dataset_data, dataset, test_set_index, is_boxcox, lmbda)
+            result_model = model_lstm(dataset_data, dataset, test_set_index, n_inputs, n_epochs, n_units, is_boxcox, lmbda)
 
             model.dataset = dataset
             # model.graph = result_model["graph"]
@@ -86,6 +89,9 @@ def add_lstm(request, dataset):
             model_details = {
                 'id' : get_timestamp(),
                 'model_name' : result_model['model_name'],
+                'n_inputs' : n_inputs,
+                'n_epochs' : n_epochs,
+                'n_units' : n_units,
                 'is_boxcox' : is_boxcox,
                 'lmbda' : lmbda,
                 'dataset' : dataset,
