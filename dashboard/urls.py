@@ -14,6 +14,7 @@ urlpatterns = [
     path('<str:dataset>/edit/<str:date>', views.edit_datapoint, name='edit_datapoint'),
     path('<str:dataset>/add', views.add_datapoint, name='add_datapoint'),
     path('<str:dataset>/delete', views.delete_datapoint, name='delete_datapoint'),
+    path('<str:dataset>/change_test', views.change_test_set, name='change_test_set'),
 
     path('change_summary_year/<str:dataset>', views.change_summary_year, name='change_summary_year'),
     path('change_model_year/<str:dataset>/<str:id>', views.change_model_year, name='change_model_year'),

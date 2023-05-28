@@ -154,7 +154,27 @@ def reload_dataset(request, dataset):
 
 def change_test_set(request, dataset):
     dataset_dates = "{0}_dataset_dates".format(dataset.lower())
-    list_of_dates = request.session['z`']
+    list_of_dates = request.session[dataset_dates]
+    old_year = int(request.session['{0}_test_set_date'.format(dataset.lower())][:4])
+    input_year = int(request.POST['test_set_year'])
+
+    # input checking
+    lbound = int(list_of_dates[4][:4])
+    ubound = int(list_of_dates[-4][:4]) - 1
+
+    if input_year < lbound or input_year > ubound:
+        return redirect('edit_dataset_page', dataset)
+
+    clear_all_models(request, dataset)
+    request.session.modified = True
+
+    request.session['{0}_test_set_date'.format(dataset.lower())] = "{0}-01-01".format(input_year)
+    request.session['{0}_test_set_index'.format(dataset.lower())] -= (old_year - input_year) * 4
+
+    k = request.session['{0}_test_set_date'.format(dataset.lower())]
+    l = request.session['{0}_test_set_index'.format(dataset.lower())]
+
+    return redirect('edit_dataset_page', dataset)
 
 
 def add_datapoint(request, dataset):
@@ -244,6 +264,10 @@ def edit_dataset_page(request, dataset):
     dataset_dates = request.session[dataset_dates]
     dataset_data = request.session[dataset_name]
 
+    test_set_index = request.session["{0}_test_set_index".format(dataset.lower())]
+    test_set_date = request.session["{0}_test_set_date".format(dataset.lower())]
+    test_set_year = int(test_set_date[:4])
+
     dataset_table = []
     curr_date = datetime.strptime(dataset_dates[0], '%Y-%m-%d')
 
@@ -265,7 +289,10 @@ def edit_dataset_page(request, dataset):
 
     context = {
         'dataset_table' : dataset_table,
-        'dataset' : dataset
+        'dataset' : dataset,
+        'test_set_index' : test_set_index,
+        'test_set_date' : test_set_date,
+        'test_set_year' : test_set_year,
     }
 
     return render(request, 'dashboard/edit_dataset_page.html', context)

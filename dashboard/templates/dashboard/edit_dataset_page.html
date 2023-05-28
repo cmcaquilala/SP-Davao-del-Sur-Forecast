@@ -21,18 +21,18 @@
 
         <div class="col">
 
-            <form method="POST" action="{% url 'change_summary_year' dataset %}">
+            <form method="POST" action="{% url 'change_test_set' dataset %}">
                 {% csrf_token %}
                 <div class="row align-items-center mx-5">
                     <div class="col-auto">
                         Test Set Year:
                     </div>
                     <div class="col-auto">
-                        <input type="number" class="form-control" name="summary_end_year" placeholder="Year"/>
+                        <input type="number" class="form-control" name="test_set_year" value="{{test_set_year}}" placeholder="Year"/>
                     </div>
                     <div class="col-auto align-items-center">
                         <button class="btn btn-success" type="submit">
-                            Refresh
+                            Save
                         </button>
                     </div>
                 </div>
