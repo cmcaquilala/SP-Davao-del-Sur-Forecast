@@ -21,7 +21,7 @@ import seaborn as sns
 # from statsmodels.tsa.arima_model import ARIMA
 
 
-def model_winters(dataset_data, dataset_name, train_set_idx, is_boxcox, lmbda):
+def model_winters(dataset_data, dataset_name, train_set_idx, trend, seasonal, damped, is_boxcox, lmbda):
 	# Initialization
 	# 28*4 forecasts = up to 2050
 	test_set_date = dataset_data.iloc[-1]['Date']
@@ -32,8 +32,18 @@ def model_winters(dataset_data, dataset_name, train_set_idx, is_boxcox, lmbda):
 	train_set = dataset_data[0:train_set_size]
 	test_set = dataset_data[train_set_size:]
 
-	# Creating Holt-Winters Model
+	# checking inputs
+	if trend.lower() in ("mult","multiplicative"):
+		trend = "mul"
+	else:
+		trend = "add"
 
+	if seasonal.lower() in ("mult","multiplicative"):
+		seasonal = "mul"
+	else:
+		seasonal = "add"
+
+	# Creating Holt-Winters Model
     # Transforming
 	if is_boxcox:
 		lmbda = stats.boxcox(dataset_data["Volume"])[1]
@@ -42,8 +52,7 @@ def model_winters(dataset_data, dataset_name, train_set_idx, is_boxcox, lmbda):
 		df_data = train_set['Volume']
 
     # Creating Model
-	model = ExponentialSmoothing(df_data, seasonal_periods=4, 
-								trend='additive', seasonal='additive')
+	model = ExponentialSmoothing(df_data, seasonal_periods=4, trend=trend, damped_trend=damped, seasonal=seasonal)
 	model_fit = model.fit()
 
     # Fitting with test set

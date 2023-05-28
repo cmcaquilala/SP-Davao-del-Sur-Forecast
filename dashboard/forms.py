@@ -40,10 +40,13 @@ class HoltWinters_add_form(ModelForm):
 
     class Meta:
         model = HoltWintersModel
-        fields = ['is_boxcox','lmbda']
+        fields = ['is_boxcox','lmbda','trend','seasonal','damped']
         labels = {
             'is_boxcox' : 'Use Box Cox Transformation',
             'lmbda' : 'Lambda (default: auto)',
+            'trend' : 'Trend Method',
+            'seasonal' : 'Seasonal Method',
+            'damped' : 'Use Damping',
         }
 
 class LSTM_add_form(ModelForm):

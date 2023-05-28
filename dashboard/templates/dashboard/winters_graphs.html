@@ -25,6 +25,18 @@
                 <div class="modal-body p-3">
 
                     <div class="row">
+                        <div class="col-3">
+                            {{ winters_form.trend | as_crispy_field }}
+                        </div>
+                        <div class="col-3">
+                            {{ winters_form.seasonal | as_crispy_field }}
+                        </div>
+                        <div class="col-3">
+                            {{ winters_form.damped | as_crispy_field }}
+                        </div>
+                    </div>
+
+                    <div class="row my-3">
                         <b class="mb-2">Transformation:</b>
                         {{ winters_form.is_boxcox | as_crispy_field }}
                     </div>
@@ -33,6 +45,7 @@
                             {{ winters_form.lmbda | as_crispy_field }}
                         </div>
                     </div>
+
 
                 </div>
                 
@@ -109,6 +122,9 @@
             {% if model.is_boxcox %}
             <p><b>Lambda:</b> {{model.lmbda | intcomma}}</p>
             {% endif %}
+            <p><b>Trend:</b> {{model.trend | intcomma}}</p>
+            <p><b>Seasonal:</b> {{model.seasonal | intcomma}}</p>
+            <p><b>Damped:</b> {{model.damped | intcomma}}</p>
             <p><b>MSE:</b> {{model.mse | intcomma}}</p>
             <p><b>RMSE:</b> {{model.rmse | intcomma}}</p>
             <p><b>MAD:</b> {{model.mad | intcomma}}</p>

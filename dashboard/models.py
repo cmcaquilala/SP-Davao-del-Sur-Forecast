@@ -84,7 +84,17 @@ class BayesianSARIMAModel(models.Model):
         return self.dataset + " Bayesian SARIMA" + order + seasonal + addons
     
 class HoltWintersModel(models.Model):
+    ADDITIVE = "add"
+    MULTIPLICATIVE = "mul"
+    METHOD_CHOICE = [
+        (ADDITIVE, "Additive"),
+        (MULTIPLICATIVE, "Multiplicative"),
+    ]
+
     dataset = models.TextField(null=True)
+    trend = models.CharField(null=False,choices=METHOD_CHOICE,default=ADDITIVE,max_length=3)
+    seasonal = models.CharField(null=False,choices=METHOD_CHOICE,default=ADDITIVE,max_length=3)
+    damped = models.BooleanField(default=False)
     rmse = models.DecimalField(max_digits=20, decimal_places=4,default=0)
     mse = models.DecimalField(max_digits=20, decimal_places=4,default=0)
     mape = models.DecimalField(max_digits=20, decimal_places=4,default=0)

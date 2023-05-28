@@ -41,9 +41,12 @@ def add_winters(request, dataset):
             # my_seasonal_order = (int(request.POST["sp_param"]), int(request.POST["sd_param"]), int(request.POST["sq_param"]), int(request.POST["m_param"]))
             is_boxcox = request.POST.get('is_boxcox', False)
             lmbda = 0 if (request.POST["lmbda"] == "" or request.POST["lmbda"] == None) else float(request.POST["lmbda"])
+            trend = "mul" if (request.POST["trend"] == "mul") else "add"
+            seasonal = "mul" if (request.POST["seasonal"] == "mul") else "add"
+            damped = True if ("damped" in request.POST) else False
 
             test_set_index = request.session['{0}_test_set_index'.format(dataset.lower())]
-            result_model = model_winters(dataset_data, dataset, test_set_index, is_boxcox, lmbda)
+            result_model = model_winters(dataset_data, dataset, test_set_index, trend, seasonal, damped, is_boxcox, lmbda)
 
             model.dataset = dataset
             # model.graph = result_model["graph"]
@@ -91,6 +94,9 @@ def add_winters(request, dataset):
                 'dataset' : dataset,
                 'mse' : result_model["mse"],
                 'rmse' : result_model["rmse"],
+                'trend' : "Additive" if trend=="add" else "Multiplicative",
+                'seasonal' : "Additive" if seasonal=="add" else "Multiplicative",
+                'damped' : str(damped),
                 'mape' : result_model["mape"],
                 'mad' : result_model["mad"],
                 'lmbda' : result_model["lmbda"],
