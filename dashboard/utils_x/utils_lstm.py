@@ -32,14 +32,17 @@ import os
 tf.keras.utils.set_random_seed(5)
 os.environ['PYTHONHASHSEED']=str(5)
 
-def model_lstm(dataset_data, dataset_name, is_boxcox, lmbda):
+def model_lstm(dataset_data, dataset_name, train_set_idx, is_boxcox, lmbda):
 	# Initialization
 	# 28*4 forecasts = up to 2050
-	no_of_forecasts = 28 * 4
-	train_set_size = 132
+	test_set_date = dataset_data.iloc[-1]['Date']
+	no_of_forecasts = (2050 - (test_set_date.year + 1) + 1) * 4
+	forecast_dates = pd.date_range(start=test_set_date, periods=no_of_forecasts, freq="QS")
+
 	n_input = 4
 	n_features = 1
 
+	train_set_size = train_set_idx
 	train_set = dataset_data[0:train_set_size]
 	test_set = dataset_data[train_set_size:]
 

@@ -24,28 +24,31 @@ import rpy2
 import rpy2.robjects as robjects
 from rpy2.robjects.packages import importr, data
 
-# r_base = importr('base')
-# r_utils = importr('utils')
-# r_generics = importr('generics')
+r_base = importr('base')
+r_utils = importr('utils')
+r_generics = importr('generics')
 
-# r_utils.chooseCRANmirror(ind=1)
-# r_utils.install_packages('stats')
-# r_utils.install_packages('forecast')
-# r_utils.install_packages("rstan")
-# r_utils.install_packages('bayesforecast')
+r_utils.chooseCRANmirror(ind=1)
+r_utils.install_packages('stats')
+r_utils.install_packages('forecast')
+r_utils.install_packages("rstan")
+r_utils.install_packages('bayesforecast')
 
-# r_stats = importr('stats')
-# r_forecast = importr('forecast')
-# r_bayesforecast = importr('bayesforecast')
+r_stats = importr('stats')
+r_forecast = importr('forecast')
+r_bayesforecast = importr('bayesforecast')
 
-def model_bayesian(dataset_data, dataset_name, my_order, my_seasonal_order, is_boxcox, lmbda):
+def model_bayesian(dataset_data, dataset_name, train_set_idx, my_order, my_seasonal_order, is_boxcox, lmbda):
 
 	# Initialization
 	# 28*4 forecasts = up to 2050
-	no_of_forecasts = 28 * 4
-	train_set_size = 132
+	test_set_date = dataset_data.iloc[-1]['Date']
+	no_of_forecasts = (2050 - (test_set_date.year + 1) + 1) * 4
+	forecast_dates = pd.date_range(start=test_set_date, periods=no_of_forecasts, freq="QS")
+
 	no_of_iterations = 5000
 
+	train_set_size = train_set_idx
 	train_set = dataset_data[0:train_set_size]
 	test_set = dataset_data[train_set_size:]
 

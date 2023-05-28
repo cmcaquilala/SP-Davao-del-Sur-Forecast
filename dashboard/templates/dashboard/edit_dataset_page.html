@@ -14,10 +14,32 @@
         <h1 class="fw-bold">{{dataset}} Dataset</h1>
     </div>
 
-    <div class="row align-items-center">
+    <div class="row">
         <div class="col-auto">
             <a class="btn btn-success" href="{% url 'reload_dataset_page' dataset %}">Reload Dataset</a>
         </div>
+
+        <div class="col">
+
+            <form method="POST" action="{% url 'change_summary_year' dataset %}">
+                {% csrf_token %}
+                <div class="row align-items-center mx-5">
+                    <div class="col-auto">
+                        Test Set Year:
+                    </div>
+                    <div class="col-auto">
+                        <input type="number" class="form-control" name="summary_end_year" placeholder="Year"/>
+                    </div>
+                    <div class="col-auto align-items-center">
+                        <button class="btn btn-success" type="submit">
+                            Refresh
+                        </button>
+                    </div>
+                </div>
+            </form>
+            
+        </div>
+    
     </div>
         
     <hr>

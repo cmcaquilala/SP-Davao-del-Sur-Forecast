@@ -152,6 +152,11 @@ def reload_dataset(request, dataset):
     return dataset_data
 
 
+def change_test_set(request, dataset):
+    dataset_dates = "{0}_dataset_dates".format(dataset.lower())
+    list_of_dates = request.session['z`']
+
+
 def add_datapoint(request, dataset):
     # Check input
     # user_input = request.POST['new_volume']
@@ -269,7 +274,7 @@ def edit_dataset_page(request, dataset):
 
 def graphs_page(request, dataset):
 
-    # Load dataset
+    # Load session data
     dataset_dates = "{0}_dataset_dates".format(dataset.lower())
     dataset_name = "{0}_dataset_data".format(dataset.lower())
     dataset_data = pd.DataFrame()
@@ -279,6 +284,8 @@ def graphs_page(request, dataset):
         request.session['saved_bayesian'] = []
         request.session['saved_winters'] = []
         request.session['saved_lstm'] = []
+        request.session['{0}_test_set_index'.format(dataset.lower())] = 132
+        request.session['{0}_test_set_date'.format(dataset.lower())] = '2020-01-01'
         dataset_data = reload_dataset(request, dataset)
     else:
         dataset_data = pd.DataFrame({
@@ -287,6 +294,14 @@ def graphs_page(request, dataset):
         })
         dataset_data['Volume'] = pd.to_numeric(dataset_data['Volume'])
         dataset_data['Date'] = pd.to_datetime(dataset_data['Date'])
+
+    # Load test set info
+    test_set_index = request.session['{0}_test_set_index'.format(dataset.lower())]
+    test_set = dataset_data[test_set_index:]
+
+    # test_set_date = pd.to_datetime(request.session['test_set_date'])
+    # test_set_index = dataset_data.index[dataset_data['Date'] == test_set_date][0]
+    # request.session['test_set_index'] = test_set_index
 
     # Loads forms for modal
     sarima_form = SARIMA_add_form(request.POST)
@@ -315,7 +330,7 @@ def graphs_page(request, dataset):
     else:
         for model in request.session['saved_sarima']:
             if model['dataset'] == dataset:
-                model['graph'] = plot_model(dataset_data, model)
+                model['graph'] = plot_model(dataset_data, test_set_index, model)
                 sarima_models.append(model)
 
     if 'saved_bayesian' not in request.session:
@@ -323,7 +338,7 @@ def graphs_page(request, dataset):
     else:
         for model in request.session['saved_bayesian']:
             if model['dataset'] == dataset:
-                model['graph'] = plot_model(dataset_data, model)
+                model['graph'] = plot_model(dataset_data, test_set_index, model)
                 bayesian_models.append(model)
 
     if 'saved_winters' not in request.session:
@@ -331,7 +346,7 @@ def graphs_page(request, dataset):
     else:
         for model in request.session['saved_winters']:
             if model['dataset'] == dataset:
-                model['graph'] = plot_model(dataset_data, model)
+                model['graph'] = plot_model(dataset_data, test_set_index, model)
                 winters_models.append(model)
 
     if 'saved_lstm' not in request.session:
@@ -339,7 +354,7 @@ def graphs_page(request, dataset):
     else:
         for model in request.session['saved_lstm']:
             if model['dataset'] == dataset:
-                model['graph'] = plot_model(dataset_data, model)
+                model['graph'] = plot_model(dataset_data, test_set_index, model)
                 lstm_models.append(model)
 
     # collect summary
@@ -357,7 +372,6 @@ def graphs_page(request, dataset):
         summary_end_year = 2050
         request.session['summary_end_year'] = summary_end_year
 
-    test_set = dataset_data[132:]
     merged_graphs = get_merged_graphs(sarima_models, bayesian_models, winters_models, lstm_models, test_set, summary_end_year)
 
     context = {

@@ -42,7 +42,8 @@ def add_winters(request, dataset):
             is_boxcox = request.POST.get('is_boxcox', False)
             lmbda = 0 if (request.POST["lmbda"] == "" or request.POST["lmbda"] == None) else float(request.POST["lmbda"])
 
-            result_model = model_winters(dataset_data, dataset, is_boxcox, lmbda)
+            test_set_index = request.session['{0}_test_set_index'.format(dataset.lower())]
+            result_model = model_winters(dataset_data, dataset, test_set_index, is_boxcox, lmbda)
 
             model.dataset = dataset
             # model.graph = result_model["graph"]

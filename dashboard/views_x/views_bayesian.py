@@ -41,7 +41,8 @@ def add_bayesian(request, dataset):
             is_boxcox = request.POST.get('is_boxcox', False)
             lmbda = 0 if (request.POST["lmbda"] == "" or request.POST["lmbda"] == None) else float(request.POST["lmbda"])
 
-            bayesian_model = model_bayesian(dataset_data, dataset, my_order, my_seasonal_order, is_boxcox, lmbda)
+            test_set_index = request.session['{0}_test_set_index'.format(dataset.lower())]
+            bayesian_model = model_bayesian(dataset_data, dataset, test_set_index, my_order, my_seasonal_order, is_boxcox, lmbda)
 
             model.dataset = dataset
             # model.graph = bayesian_model["graph"]

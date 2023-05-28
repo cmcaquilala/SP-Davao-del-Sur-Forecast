@@ -51,9 +51,11 @@ def get_plot(x,y):
 	graph = get_graph()
 	return graph
 
-def plot_model(dataset_data, model):
-	no_of_periods = 28 * 4 + 3 * 4
-	forecast_dates = pd.date_range(start=np.datetime64("2020-01-01"), periods=no_of_periods, freq="QS")
+def plot_model(dataset_data, test_set_index, model):
+	test_set_date = dataset_data.iloc[test_set_index]['Date']
+
+	no_of_periods = (2050 - test_set_date.year + 1) * 4
+	forecast_dates = pd.date_range(start=test_set_date, periods=no_of_periods, freq="QS")
 
 	predictions = model['forecasts']
 
@@ -87,7 +89,7 @@ def get_merged_graphs(sarima_models, bayesian_models, winters_models, lstm_model
 	plt.legend()
     
 	date_start = test_set['Date'][test_set.index.start]
-	no_of_periods = (end_year - 2020 + 1) * 4
+	no_of_periods = (end_year - date_start.year + 1) * 4
 
 	if (len(sarima_models) + len(bayesian_models) + len(winters_models) + len(lstm_models) < 1):
 		return get_graph()
