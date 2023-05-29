@@ -38,13 +38,23 @@ from rpy2.robjects.packages import importr
 # r_forecast = importr('forecast')
 
 def get_r_package(pkg_name):
+	# Docker's Copy
+	lib_dir1 = '/usr/local/lib/R/site-library'
+	lib_dir2 = '/usr/lib/R/site-library'
+	lib_dir3 = '/usr/lib/R/library'
+
+	# Cedric's Copy
+	# lib_dir1 = 'C:/Users/Cedric/AppData/Local/R/win-library/4.3'
+	# lib_dir2 = 'C:/Program Files/R/R-4.3.0/library'
+	# lib_dir3 = None
+
 	try:
-		return importr(pkg_name, suppress_messages=False, lib_loc='/usr/local/lib/R/site-library')
+		return importr(pkg_name, suppress_messages=False, lib_loc=lib_dir1)
 	except:
 		try:
-			return importr(pkg_name, suppress_messages=False, lib_loc='/usr/lib/R/site-library')
+			return importr(pkg_name, suppress_messages=False, lib_loc=lib_dir2)
 		except:
-			return importr(pkg_name, suppress_messages=False, lib_loc='/usr/lib/R/library')
+			return importr(pkg_name, suppress_messages=False, lib_loc=lib_dir3)
 
 def get_graph():
 	buffer = BytesIO()
