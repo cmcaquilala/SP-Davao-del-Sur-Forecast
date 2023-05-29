@@ -123,15 +123,20 @@
         </div>
 
         <div class="col">
-            <div class="row gx-1">
-                <div class="col">
-                    <h4>{{model.model_name}}</h4>
+            <h4>{{model.model_name}}</h4>
+            {% if model.is_boxcox %}
+            <p>BoxCox, Lambda = {{model.lmbda}}</p>
+            {% endif %}
+            <hr>
+            <div class="row">
+                <div class="col-auto">
+                    <a class="btn btn-success btn-sm" href="{% url 'save_results' dataset model.id %}">Save <i class="fa-solid fa-download"> </i></a>
                 </div>
                 <div class="col-auto">
-                    <a class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#forecastsbayesian{{model.id}}">Forecasts <i class="fa-solid fa-chart-line"> </i></a>
+                    <a class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#forecastswinters{{model.id}}">Forecasts <i class="fa-solid fa-chart-line"> </i></a>
                 </div>
                 <div class="col-auto">
-                    <a class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deletebayesian{{model.id}}">Delete <i class="fa-solid fa-chart-trash"> </i></a>
+                    <a class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deletewinters{{model.id}}">Delete <i class="fa-solid fa-trash"> </i></a>
                 </div>
             </div>
             {% if model.is_boxcox %}

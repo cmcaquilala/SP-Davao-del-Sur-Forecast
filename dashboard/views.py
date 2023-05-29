@@ -4,6 +4,7 @@ import csv
 import json
 
 from django.shortcuts import render, redirect
+from django.http import HttpResponse
 from django.templatetags.static import static
 from .models import *
 from .forms import *
@@ -107,6 +108,25 @@ def delete_model(request, dataset, id):
     request.session.modified = True
 
     return redirect('graphs_page', dataset)
+
+
+def save_results(request, dataset, id):
+    model_types = ["sarima", "bayesian", "winters", "lstm"]
+    model_to_save = {}
+
+    for model_type in model_types:
+        for model in request.session["saved_{0}".format(model_type)]:
+            if model['id'] == id:
+                model_to_save = model
+
+    download_file = json.dumps(model, indent=4)
+    response = HttpResponse(download_file, content_type='application/json')
+    response['Content-Disposition'] = 'attachment; filename={0}'.format("saved_model.json")
+
+    # with open("model {0}".format(id), "w") as outfile:
+    #     outfile.write(download_file)
+
+    return response
 
 
 def clear_all_models(request, dataset):
@@ -298,8 +318,6 @@ def edit_dataset_page(request, dataset):
     }
 
     return render(request, 'dashboard/edit_dataset_page.html', context)
-
-
 
 def graphs_page(request, dataset):
 

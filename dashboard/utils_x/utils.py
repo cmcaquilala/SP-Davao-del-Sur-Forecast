@@ -170,8 +170,8 @@ def get_merged_graphs(sarima_models, bayesian_models, winters_models, lstm_model
 			"BC " + str(model['lmbda']) if model['is_boxcox'] else ""))
 		plt.legend()
 
-
 	return get_graph()
+
 
 def get_MSE(actual, predictions):
 	total = 0
