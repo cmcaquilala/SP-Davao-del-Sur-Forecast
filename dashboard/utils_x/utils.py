@@ -2,6 +2,9 @@ import base64
 from io import BytesIO
 from datetime import datetime
 import math
+import csv
+import json
+import os
 
 # stat-related
 # from statsmodels.graphics.tsaplots import plot_pacf
@@ -171,6 +174,66 @@ def get_merged_graphs(sarima_models, bayesian_models, winters_models, lstm_model
 		plt.legend()
 
 	return get_graph()
+
+
+def reload_dataset(request, dataset):
+	# Load dataset
+	dataset_dates = "{0}_dataset_dates".format(dataset.lower())
+	dataset_name = "{0}_dataset_data".format(dataset.lower())
+	dataset_data = pd.DataFrame()
+
+	request.session[dataset_dates] = []
+	request.session[dataset_name] = []
+
+	clear_all_models(request, dataset)
+	load_best_models(request, dataset)
+  
+	filename = "static/{0} data.csv".format(str.lower(dataset))  
+	with open(filename) as file:
+		reader = csv.reader(file)
+		readerlist = []
+		next(reader)
+        
+		for row in reader:
+			readerlist.append(row)
+
+	dataset_data = pd.DataFrame(readerlist, columns=['Date','Volume'])
+	dataset_data['Volume'] = pd.to_numeric(dataset_data['Volume'])
+	dataset_data['Date'] = pd.to_datetime(dataset_data['Date'])
+
+	request.session[dataset_dates] = dataset_data['Date'].astype(str).tolist()
+	request.session[dataset_name] = dataset_data['Volume'].tolist()
+	request.session.modified = True
+
+	return dataset_data
+
+
+def clear_all_models(request, dataset):
+	model_types = ["sarima", "bayesian", "winters", "lstm"]
+
+	for model_type in model_types:
+		for model in request.session["saved_{0}".format(model_type)]:
+			if model['dataset'] == dataset:
+				request.session["saved_{0}".format(model_type)].remove(model)
+				request.session.modified = True
+
+
+def load_best_models(request, dataset):
+	model_dir = 'static/results/'
+	best_models = os.listdir(model_dir)
+	for filename in best_models:
+		with open("{0}{1}".format(model_dir, filename), 'r') as json_file:
+			model_results = json.load(json_file)
+			if model_results['dataset'].lower() == dataset:
+				save_json_to_session(request, model_results)
+
+
+def save_json_to_session(request, model_results):
+	model_results['id'] = get_timestamp()
+	model_type = model_results['model_type']
+
+	request.session['saved_{0}'.format(model_type)].append(model_results)
+	request.session.modified = True
 
 
 def get_MSE(actual, predictions):

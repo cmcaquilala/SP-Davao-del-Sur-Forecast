@@ -135,58 +135,9 @@ def upload_results(request, dataset):
     
     json_file = request.FILES['json_file']
     model_results = json.load(json_file)
-    model_results['id'] = get_timestamp()
-    
-    model_type = model_results['model_type']
-    request.session['saved_{0}'.format(model_type)].append(model_results)
-    request.session.modified = True
+    save_json_to_session(request, model_results)
 
     return redirect('graphs_page', dataset)
-
-
-def clear_all_models(request, dataset):
-    model_types = ["sarima", "bayesian", "winters", "lstm"]
-
-    for model_type in model_types:
-        for model in request.session["saved_{0}".format(model_type)]:
-            if model['dataset'] == dataset:
-                request.session["saved_{0}".format(model_type)].remove(model)
-                request.session.modified = True
-
-
-def reload_dataset(request, dataset):
-    # Load dataset
-    dataset_dates = "{0}_dataset_dates".format(dataset.lower())
-    dataset_name = "{0}_dataset_data".format(dataset.lower())
-    dataset_data = pd.DataFrame()
-
-    request.session[dataset_dates] = []
-    request.session[dataset_name] = []
-
-    clear_all_models(request, dataset)
-    request.session.modified = True
-
-    print(str.lower(dataset))
-  
-    filename = "static/{0} data.csv".format(str.lower(dataset))  
-    with open(filename) as file:
-        reader = csv.reader(file)
-        readerlist = []
-        next(reader)
-        
-        for row in reader:
-            readerlist.append(row)
-
-    dataset_data = pd.DataFrame(readerlist, columns=['Date','Volume'])
-    dataset_data['Volume'] = pd.to_numeric(dataset_data['Volume'])
-    dataset_data['Date'] = pd.to_datetime(dataset_data['Date'])
-
-    request.session[dataset_dates] = dataset_data['Date'].astype(str).tolist()
-    request.session[dataset_name] = dataset_data['Volume'].tolist()
-
-    request.session.modified = True
-
-    return dataset_data
 
 
 def change_test_set(request, dataset):
@@ -287,6 +238,9 @@ def delete_datapoint(request, dataset):
 
     return redirect('edit_dataset_page', dataset)
 
+def reload_models_page(request, dataset):
+    reload_dataset(request, dataset)
+    return redirect('graphs_page', dataset)
 
 def reload_dataset_page(request, dataset):
     reload_dataset(request, dataset)
@@ -351,8 +305,8 @@ def graphs_page(request, dataset):
         request.session['rice_test_set_date'] = '2020-01-01'
         request.session['corn_test_set_index'] = 132
         request.session['corn_test_set_date'] = '2020-01-01'
-        dataset_data = reload_dataset(request, 'rice')
         dataset_data = reload_dataset(request, 'corn')
+        dataset_data = reload_dataset(request, 'rice')
     else:
         dataset_data = pd.DataFrame({
             'Date' : request.session[dataset_dates],
