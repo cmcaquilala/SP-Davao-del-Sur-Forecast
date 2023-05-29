@@ -24,16 +24,16 @@ import rpy2
 import rpy2.robjects as robjects
 from rpy2.robjects.packages import importr, data
 
-r_base = importr('base')
-r_utils = importr('utils')
-r_generics = importr('generics')
+r_base = get_r_package('base')
+r_utils = get_r_package('utils')
+r_generics = get_r_package('generics')
 
-r_utils.chooseCRANmirror(ind=1)
-r_utils.install_packages('stats')
-r_utils.install_packages('forecast')
+# r_utils.chooseCRANmirror(ind=1)
+# r_utils.install_packages('stats')
+# r_utils.install_packages('forecast')
 
-r_stats = importr('stats')
-r_forecast = importr('forecast')
+r_stats = get_r_package('stats')
+r_forecast = get_r_package('forecast')
 
 
 def model_sarima(dataset_data, dataset_name, train_set_idx, my_order, my_seasonal_order, is_boxcox, lmbda):

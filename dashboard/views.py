@@ -131,6 +131,8 @@ def reload_dataset(request, dataset):
     clear_all_models(request, dataset)
     request.session.modified = True
 
+    print(str.lower(dataset))
+  
     filename = "static/{0} data.csv".format(str.lower(dataset))  
     with open(filename) as file:
         reader = csv.reader(file)

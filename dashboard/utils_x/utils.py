@@ -24,6 +24,7 @@ import matplotlib.pyplot as plt
 # import rpy2
 # import rpy2.robjects as robjects
 # from rpy2.robjects.packages import importr, data
+from rpy2.robjects.packages import importr
 
 # r_base = importr('base')
 # r_utils = importr('utils')
@@ -35,6 +36,15 @@ import matplotlib.pyplot as plt
 
 # r_stats = importr('stats')
 # r_forecast = importr('forecast')
+
+def get_r_package(pkg_name):
+	try:
+		return importr(pkg_name, suppress_messages=False, lib_loc='/usr/local/lib/R/site-library')
+	except:
+		try:
+			return importr(pkg_name, suppress_messages=False, lib_loc='/usr/lib/R/site-library')
+		except:
+			return importr(pkg_name, suppress_messages=False, lib_loc='/usr/lib/R/library')
 
 def get_graph():
 	buffer = BytesIO()
