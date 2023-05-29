@@ -308,14 +308,18 @@ def graphs_page(request, dataset):
     dataset_name = "{0}_dataset_data".format(dataset.lower())
     dataset_data = pd.DataFrame()
 
+    # Basically if session just started
     if dataset_name not in request.session:
         request.session['saved_sarima'] = []
         request.session['saved_bayesian'] = []
         request.session['saved_winters'] = []
         request.session['saved_lstm'] = []
-        request.session['{0}_test_set_index'.format(dataset.lower())] = 132
-        request.session['{0}_test_set_date'.format(dataset.lower())] = '2020-01-01'
-        dataset_data = reload_dataset(request, dataset)
+        request.session['rice_test_set_index'] = 132
+        request.session['rice_test_set_date'] = '2020-01-01'
+        request.session['corn_test_set_index'] = 132
+        request.session['corn_test_set_date'] = '2020-01-01'
+        dataset_data = reload_dataset(request, 'rice')
+        dataset_data = reload_dataset(request, 'corn')
     else:
         dataset_data = pd.DataFrame({
             'Date' : request.session[dataset_dates],
