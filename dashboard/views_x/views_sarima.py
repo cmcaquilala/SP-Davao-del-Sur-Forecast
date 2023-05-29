@@ -85,6 +85,7 @@ def add_sarima(request, dataset):
             model_details = {
                 'id' : get_timestamp(),
                 'model_name' : result_model['model_name'],
+                'model_type' : 'sarima',
                 'is_boxcox' : is_boxcox,
                 'lmbda' : lmbda,
                 'dataset' : dataset,

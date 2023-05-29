@@ -89,6 +89,7 @@ def add_winters(request, dataset):
             model_details = {
                 'id' : get_timestamp(),
                 'model_name' : result_model['model_name'],
+                'model_type' : 'winters',
                 'is_boxcox' : is_boxcox,
                 'lmbda' : lmbda,
                 'dataset' : dataset,

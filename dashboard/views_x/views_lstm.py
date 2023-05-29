@@ -89,6 +89,7 @@ def add_lstm(request, dataset):
             model_details = {
                 'id' : get_timestamp(),
                 'model_name' : result_model['model_name'],
+                'model_type' : 'lstm',
                 'n_inputs' : n_inputs,
                 'n_epochs' : n_epochs,
                 'n_units' : n_units,

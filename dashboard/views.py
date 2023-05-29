@@ -6,6 +6,7 @@ import json
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from django.templatetags.static import static
+from django.core.files.uploadedfile import SimpleUploadedFile
 from .models import *
 from .forms import *
 
@@ -110,7 +111,7 @@ def delete_model(request, dataset, id):
     return redirect('graphs_page', dataset)
 
 
-def save_results(request, dataset, id):
+def download_results(request, dataset, id):
     model_types = ["sarima", "bayesian", "winters", "lstm"]
     model_to_save = {}
 
@@ -127,6 +128,20 @@ def save_results(request, dataset, id):
     #     outfile.write(download_file)
 
     return response
+
+
+def upload_results(request, dataset):
+    a = request.FILES
+    
+    json_file = request.FILES['json_file']
+    model_results = json.load(json_file)
+    model_results['id'] = get_timestamp()
+    
+    model_type = model_results['model_type']
+    request.session['saved_{0}'.format(model_type)].append(model_results)
+    request.session.modified = True
+
+    return redirect('graphs_page', dataset)
 
 
 def clear_all_models(request, dataset):
@@ -359,6 +374,7 @@ def graphs_page(request, dataset):
     bayesian_form = BayesianSARIMA_add_form(request.POST)
     winters_form = HoltWinters_add_form(request.POST)
     lstm_form = LSTM_add_form(request.POST)
+    upload_form = JSON_upload_form(request.POST)
 
     # Load all models
     sarima_models = []
@@ -436,6 +452,7 @@ def graphs_page(request, dataset):
         'bayesian_form' : bayesian_form,
         'winters_form' : winters_form,
         'lstm_form' : lstm_form,
+        'upload_form' : upload_form,
     }
 
     return render(request, 'dashboard/graph_page.html', context)

@@ -85,6 +85,7 @@ def add_bayesian(request, dataset):
             model_details = {
                 'id' : get_timestamp(),
                 'model_name' : result_model['model_name'],
+                'model_type' : 'bayesian',
                 'is_boxcox' : is_boxcox,
                 'lmbda' : lmbda,
                 'dataset' : dataset,

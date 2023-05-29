@@ -19,7 +19,8 @@ urlpatterns = [
     path('change_summary_year/<str:dataset>', views.change_summary_year, name='change_summary_year'),
     path('change_model_year/<str:dataset>/<str:id>', views.change_model_year, name='change_model_year'),
     path('delete_model/<str:dataset>/<str:id>', views.delete_model, name='delete_model'),
-    path('save_results/<str:dataset>/<str:id>', views.save_results, name='save_results'),
+    path('download_results/<str:dataset>/<str:id>', views.download_results, name='download_results'),
+    path('upload_results/<str:dataset>', views.upload_results, name='upload_results'),
 
     path('add_sarima/<str:dataset>', views.add_sarima, name='add_sarima'),
     path('add_bayesian/<str:dataset>', views.add_bayesian, name='add_bayesian'),
