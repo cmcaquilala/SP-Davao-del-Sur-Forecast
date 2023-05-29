@@ -140,10 +140,7 @@ def model_sarima(dataset_data, dataset_name, train_set_idx, my_order, my_seasona
 	# plt.savefig("static/images/" + filename, format = "png")
 	graph = get_graph()
 
-	model_name = "SARIMA {0}{1}".format(my_order, my_seasonal_order)
-
 	return {
-		"model_name" : model_name,
 		"graph" : graph,
 		# "filename" : filename,
 		"predictions" : predictions,

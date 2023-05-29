@@ -85,10 +85,17 @@ def add_winters(request, dataset):
             display_start = 1987
             display_end = 2025
 
+            model_name = "Holt-Winters {0}{1}{2} {3}".format(
+                trend[0].upper(),
+                seasonal[0].upper(),
+                "D" if damped else "N",
+                "BC" if is_boxcox else ""
+            )
+
             # save into session
             model_details = {
                 'id' : get_timestamp(),
-                'model_name' : result_model['model_name'],
+                'model_name' : model_name,
                 'model_type' : 'winters',
                 'is_boxcox' : is_boxcox,
                 'lmbda' : lmbda,

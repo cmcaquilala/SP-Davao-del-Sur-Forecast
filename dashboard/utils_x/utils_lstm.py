@@ -159,13 +159,10 @@ def model_lstm(dataset_data, dataset_name, train_set_idx, n_inputs, n_epochs, n_
 	# plt.savefig("static/images/" + filename, format = "png")
 	graph = get_graph()
 
-	model_name = 'LSTM'
-
 	predictions = predictions.values.tolist()
 	forecasts = forecasts.values.tolist()
 
 	return {
-		"model_name" : model_name,
 		"graph" : graph,
 		# "filename" : filename,
 		"predictions" : predictions,

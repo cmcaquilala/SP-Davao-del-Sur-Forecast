@@ -126,9 +126,7 @@ def get_merged_graphs(sarima_models, bayesian_models, winters_models, lstm_model
 		for i in range(no_of_periods):
 			predictions.append(model['forecasts'][i])
 
-		plt.plot(forecast_dates, predictions,label="{0} {1}".format(
-			str(model['model_name']),
-			"BC " + str(model['lmbda']) if model['is_boxcox'] else ""))
+		plt.plot(forecast_dates, predictions,label="{0}".format(str(model['model_name'])))
 		plt.legend()
 
 	for model in bayesian_models:
@@ -140,9 +138,7 @@ def get_merged_graphs(sarima_models, bayesian_models, winters_models, lstm_model
 		for i in range(no_of_periods):
 			predictions.append(model['forecasts'][i])
 
-		plt.plot(forecast_dates, predictions,label="{0} {1}".format(
-			str(model['model_name']),
-			"BC " + str(model['lmbda']) if model['is_boxcox'] else ""))
+		plt.plot(forecast_dates, predictions,label="{0}".format(str(model['model_name'])))
 		plt.legend()
 
 	for model in winters_models:
@@ -154,9 +150,7 @@ def get_merged_graphs(sarima_models, bayesian_models, winters_models, lstm_model
 		for i in range(no_of_periods):
 			predictions.append(model['forecasts'][i])
 
-		plt.plot(forecast_dates, predictions,label="{0} {1}".format(
-			str(model['model_name']),
-			"BC " + str(model['lmbda']) if model['is_boxcox'] else ""))
+		plt.plot(forecast_dates, predictions,label="{0}".format(str(model['model_name'])))
 		plt.legend()
 
 	for model in lstm_models:
@@ -168,9 +162,7 @@ def get_merged_graphs(sarima_models, bayesian_models, winters_models, lstm_model
 		for i in range(no_of_periods):
 			predictions.append(model['forecasts'][i])
 
-		plt.plot(forecast_dates, predictions,label="{0} {1}".format(
-			str(model['model_name']),
-			"BC " + str(model['lmbda']) if model['is_boxcox'] else ""))
+		plt.plot(forecast_dates, predictions,label="{0}".format(str(model['model_name'])))
 		plt.legend()
 
 	return get_graph()
@@ -213,9 +205,9 @@ def clear_all_models(request, dataset):
 
 	for model_type in model_types:
 		for model in request.session["saved_{0}".format(model_type)]:
-			if model['dataset'] == dataset:
-				request.session["saved_{0}".format(model_type)].remove(model)
-				request.session.modified = True
+			newlist = [model for model in request.session["saved_{0}".format(model_type)] if model['dataset']!=dataset]
+			request.session["saved_{0}".format(model_type)] = newlist
+			request.session.modified = True
 
 
 def load_best_models(request, dataset):

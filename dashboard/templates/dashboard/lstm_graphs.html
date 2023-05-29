@@ -101,10 +101,6 @@
 
         <div class="col">
             <h4>{{model.model_name}}</h4>
-            {% if model.is_boxcox %}
-            <p>BoxCox, Lambda = {{model.lmbda}}</p>
-            {% endif %}
-            <hr>
             <div class="row">
                 <div class="col-auto">
                     <a class="btn btn-success btn-sm" href="{% url 'download_results' dataset model.id %}">Save <i class="fa-solid fa-download"> </i></a>
@@ -116,9 +112,6 @@
                     <a class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deletelstm{{model.id}}">Delete <i class="fa-solid fa-trash"> </i></a>
                 </div>
             </div>
-            {% if model.is_boxcox %}
-            <p>BoxCox, Lambda = {{model.lmbda}}</p>
-            {% endif %}
             <hr>
             <p><b>Box Cox: 
                 {{ model.is_boxcox | yesno:'Yes,No' }}

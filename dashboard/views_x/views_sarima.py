@@ -81,10 +81,16 @@ def add_sarima(request, dataset):
             display_start = 1987
             display_end = 2025
 
+            model_name = "SARIMA {0}{1} {2}".format(
+                my_order,
+                my_seasonal_order,
+                "BC" if is_boxcox else ""
+                )
+
             # save into session
             model_details = {
                 'id' : get_timestamp(),
-                'model_name' : result_model['model_name'],
+                'model_name' : model_name,
                 'model_type' : 'sarima',
                 'is_boxcox' : is_boxcox,
                 'lmbda' : lmbda,

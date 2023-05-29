@@ -85,10 +85,17 @@ def add_lstm(request, dataset):
             display_start = 1987
             display_end = 2025
 
+            model_name = "LSTM U({0}) E({1}) W({2}) {3}".format(
+                n_units,
+                n_epochs,
+                n_inputs,
+                "BC" if is_boxcox else ""
+            )
+
             # save into session
             model_details = {
                 'id' : get_timestamp(),
-                'model_name' : result_model['model_name'],
+                'model_name' : model_name,
                 'model_type' : 'lstm',
                 'n_inputs' : n_inputs,
                 'n_epochs' : n_epochs,
@@ -113,8 +120,8 @@ def add_lstm(request, dataset):
 
     return redirect('graphs_page', dataset)
 
-def delete_lstm(request, dataset, id):
-    model = LSTMModel.objects.get(id=id)
-    model.delete()
+# def delete_lstm(request, dataset, id):
+#     model = LSTMModel.objects.get(id=id)
+#     model.delete()
 
-    return redirect('graphs_page', dataset)
+#     return redirect('graphs_page', dataset)

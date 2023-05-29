@@ -124,32 +124,17 @@
 
         <div class="col">
             <h4>{{model.model_name}}</h4>
-            {% if model.is_boxcox %}
-            <p>BoxCox, Lambda = {{model.lmbda}}</p>
-            {% endif %}
-            <hr>
             <div class="row">
                 <div class="col-auto">
-                    <a class="btn btn-success btn-sm" href="{% url 'save_results' dataset model.id %}">Save <i class="fa-solid fa-download"> </i></a>
+                    <a class="btn btn-success btn-sm" href="{% url 'download_results' dataset model.id %}">Save <i class="fa-solid fa-download"> </i></a>
                 </div>
                 <div class="col-auto">
-                    <a class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#forecastsbayesian{{model.id}}">Forecasts <i class="fa-solid fa-chart-line"> </i></a>
+                    <a class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#forecastslstm{{model.id}}">Forecasts <i class="fa-solid fa-chart-line"> </i></a>
                 </div>
                 <div class="col-auto">
-                    <a class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deletebayesian{{model.id}}">Delete <i class="fa-solid fa-trash"> </i></a>
+                    <a class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deletelstm{{model.id}}">Delete <i class="fa-solid fa-trash"> </i></a>
                 </div>
             </div>
-            {% if model.is_boxcox %}
-            <p>BoxCox, Lambda = {{model.lmbda}}</p>
-            {% endif %}
-            <!-- <div class="row">
-                <div class="col-auto">
-                    <a class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#forecastsbayesian{{model.id}}">Forecasts</a>
-                </div>
-                <div class="col-auto">
-                    <a class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deletebayesian{{model.id}}">Delete</a>
-                </div>
-            </div> -->
             <hr>
             <p><b>Order (p,d,q):</b> ({{model.p_param}},{{model.d_param}},{{model.q_param}})</p>
             <p><b>Seasonal Order (P,D,Q)M:</b> ({{model.sp_param}},{{model.sd_param}},{{model.sq_param}})<sub>{{model.m_param}}</sub></h4></p>
@@ -159,7 +144,6 @@
             {% if model.is_boxcox %}
             <p><b>Lambda:</b> {{model.lmbda | intcomma}}</p>
             {% endif %}
-            <p><b>BIC:</b> {{model.bic | intcomma}}</p>
             <p><b>MSE:</b> {{model.mse | intcomma}}</p>
             <p><b>RMSE:</b> {{model.rmse | intcomma}}</p>
             <p><b>MAD:</b> {{model.mad | intcomma}}</p>
