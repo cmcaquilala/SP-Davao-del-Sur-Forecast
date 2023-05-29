@@ -67,11 +67,7 @@ def get_graph():
 	graph = base64.b64encode(image_png)
 	graph = graph.decode('utf-8')
 	buffer.close()
-	return graph
-
-def get_plot(x,y):
-	# ...
-	graph = get_graph()
+	plt.close()
 	return graph
 
 def plot_model(dataset_data, test_set_index, model):

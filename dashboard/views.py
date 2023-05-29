@@ -120,7 +120,7 @@ def download_results(request, dataset, id):
             if model['id'] == id:
                 model_to_save = model
 
-    download_file = json.dumps(model, indent=4)
+    download_file = json.dumps(model_to_save, indent=4)
     response = HttpResponse(download_file, content_type='application/json')
     response['Content-Disposition'] = 'attachment; filename={0}'.format("saved_model.json")
 
