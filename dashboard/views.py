@@ -105,7 +105,7 @@ def delete_model(request, dataset, id):
     if current_model == None:
         redirect('graphs_page', dataset)
 
-    request.session["saved_{0}".format(current_type)].remove(model)
+    request.session["saved_{0}".format(current_type)].remove(current_model)
     request.session.modified = True
 
     return redirect('graphs_page', dataset)

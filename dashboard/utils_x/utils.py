@@ -173,8 +173,7 @@ def reload_dataset(request, dataset):
 	request.session[dataset_dates] = []
 	request.session[dataset_name] = []
 
-	clear_all_models(request, dataset)
-	load_best_models(request, dataset)
+	clear_all_models(request, dataset.lower())
   
 	filename = "static/{0} data.csv".format(str.lower(dataset))  
 	with open(filename) as file:
@@ -193,6 +192,8 @@ def reload_dataset(request, dataset):
 	request.session[dataset_name] = dataset_data['Volume'].tolist()
 	request.session.modified = True
 
+	load_best_models(request, dataset.lower())
+
 	return dataset_data
 
 
@@ -200,10 +201,9 @@ def clear_all_models(request, dataset):
 	model_types = ["sarima", "bayesian", "winters", "lstm"]
 
 	for model_type in model_types:
-		for model in request.session["saved_{0}".format(model_type)]:
-			newlist = [model for model in request.session["saved_{0}".format(model_type)] if model['dataset']!=dataset]
-			request.session["saved_{0}".format(model_type)] = newlist
-			request.session.modified = True
+		newlist = [model for model in request.session["saved_{0}".format(model_type)] if model['dataset'].lower()!=dataset.lower()]
+		request.session["saved_{0}".format(model_type)] = newlist
+		request.session.modified = True
 
 
 def load_best_models(request, dataset):
