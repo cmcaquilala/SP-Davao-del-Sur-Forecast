@@ -4,7 +4,9 @@ import csv
 import json
 
 from django.shortcuts import render, redirect
+from django.http import HttpResponse, HttpResponseNotFound, HttpResponseServerError
 from django.templatetags.static import static
+from django.core.files.uploadedfile import SimpleUploadedFile
 from .models import *
 from .forms import *
 
@@ -103,53 +105,39 @@ def delete_model(request, dataset, id):
     if current_model == None:
         redirect('graphs_page', dataset)
 
-    request.session["saved_{0}".format(current_type)].remove(model)
+    request.session["saved_{0}".format(current_type)].remove(current_model)
     request.session.modified = True
 
     return redirect('graphs_page', dataset)
 
 
-def clear_all_models(request, dataset):
+def download_results(request, dataset, id):
     model_types = ["sarima", "bayesian", "winters", "lstm"]
+    model_to_save = {}
 
     for model_type in model_types:
         for model in request.session["saved_{0}".format(model_type)]:
-            if model['dataset'] == dataset:
-                request.session["saved_{0}".format(model_type)].remove(model)
-                request.session.modified = True
+            if model['id'] == id:
+                model_to_save = model
+
+    download_file = json.dumps(model_to_save, indent=4)
+    response = HttpResponse(download_file, content_type='application/json')
+    response['Content-Disposition'] = 'attachment; filename={0}'.format("saved_model.json")
+
+    # with open("model {0}".format(id), "w") as outfile:
+    #     outfile.write(download_file)
+
+    return response
 
 
-def reload_dataset(request, dataset):
-    # Load dataset
-    dataset_dates = "{0}_dataset_dates".format(dataset.lower())
-    dataset_name = "{0}_dataset_data".format(dataset.lower())
-    dataset_data = pd.DataFrame()
+def upload_results(request, dataset):
+    a = request.FILES
+    
+    json_file = request.FILES['json_file']
+    model_results = json.load(json_file)
+    save_json_to_session(request, model_results)
 
-    request.session[dataset_dates] = []
-    request.session[dataset_name] = []
-
-    clear_all_models(request, dataset)
-    request.session.modified = True
-
-    filename = "static/{0} data.csv".format(str.lower(dataset))  
-    with open(filename) as file:
-        reader = csv.reader(file)
-        readerlist = []
-        next(reader)
-        
-        for row in reader:
-            readerlist.append(row)
-
-    dataset_data = pd.DataFrame(readerlist, columns=['Date','Volume'])
-    dataset_data['Volume'] = pd.to_numeric(dataset_data['Volume'])
-    dataset_data['Date'] = pd.to_datetime(dataset_data['Date'])
-
-    request.session[dataset_dates] = dataset_data['Date'].astype(str).tolist()
-    request.session[dataset_name] = dataset_data['Volume'].tolist()
-
-    request.session.modified = True
-
-    return dataset_data
+    return redirect('graphs_page', dataset)
 
 
 def change_test_set(request, dataset):
@@ -250,6 +238,9 @@ def delete_datapoint(request, dataset):
 
     return redirect('edit_dataset_page', dataset)
 
+def reload_models_page(request, dataset):
+    reload_dataset(request, dataset)
+    return redirect('graphs_page', dataset)
 
 def reload_dataset_page(request, dataset):
     reload_dataset(request, dataset)
@@ -297,8 +288,6 @@ def edit_dataset_page(request, dataset):
 
     return render(request, 'dashboard/edit_dataset_page.html', context)
 
-
-
 def graphs_page(request, dataset):
 
     # Load session data
@@ -306,14 +295,18 @@ def graphs_page(request, dataset):
     dataset_name = "{0}_dataset_data".format(dataset.lower())
     dataset_data = pd.DataFrame()
 
+    # Basically if session just started
     if dataset_name not in request.session:
         request.session['saved_sarima'] = []
         request.session['saved_bayesian'] = []
         request.session['saved_winters'] = []
         request.session['saved_lstm'] = []
-        request.session['{0}_test_set_index'.format(dataset.lower())] = 132
-        request.session['{0}_test_set_date'.format(dataset.lower())] = '2020-01-01'
-        dataset_data = reload_dataset(request, dataset)
+        request.session['rice_test_set_index'] = 132
+        request.session['rice_test_set_date'] = '2020-01-01'
+        request.session['corn_test_set_index'] = 132
+        request.session['corn_test_set_date'] = '2020-01-01'
+        dataset_data = reload_dataset(request, 'corn')
+        dataset_data = reload_dataset(request, 'rice')
     else:
         dataset_data = pd.DataFrame({
             'Date' : request.session[dataset_dates],
@@ -335,6 +328,7 @@ def graphs_page(request, dataset):
     bayesian_form = BayesianSARIMA_add_form(request.POST)
     winters_form = HoltWinters_add_form(request.POST)
     lstm_form = LSTM_add_form(request.POST)
+    upload_form = JSON_upload_form(request.POST)
 
     # Load all models
     sarima_models = []
@@ -412,6 +406,8 @@ def graphs_page(request, dataset):
         'bayesian_form' : bayesian_form,
         'winters_form' : winters_form,
         'lstm_form' : lstm_form,
+        'upload_form' : upload_form,
     }
 
     return render(request, 'dashboard/graph_page.html', context)
+

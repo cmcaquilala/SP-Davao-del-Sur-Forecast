@@ -1,5 +1,5 @@
 from django import forms
-from django.forms import ModelForm
+from django.forms import Form, ModelForm
 from .models import *
 
 class SARIMA_add_form(ModelForm):
@@ -60,4 +60,13 @@ class LSTM_add_form(ModelForm):
             'n_inputs' : 'Window Size',
             'n_epochs' : 'Epochs',
             'n_units' : 'Number of Units',
+        }
+
+class JSON_upload_form(Form):
+    json_file = forms.FileField(allow_empty_file=False)
+
+    class Meta:
+
+        labels = {
+            'json_file' : 'JSON File',
         }

@@ -100,10 +100,12 @@
             {% endif %}
         </div>
 
+
         <div class="col">
-            <div class="row gx-1">
-                <div class="col">
-                    <h4>{{model.model_name}}</h4>
+            <h4>{{model.model_name}}</h4>
+            <div class="row">
+                <div class="col-auto">
+                    <a class="btn btn-success btn-sm" href="{% url 'download_results' dataset model.id %}">Save <i class="fa-solid fa-download"> </i></a>
                 </div>
                 <div class="col-auto">
                     <a class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#forecastswinters{{model.id}}">Forecasts <i class="fa-solid fa-chart-line"> </i></a>
@@ -112,9 +114,6 @@
                     <a class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deletewinters{{model.id}}">Delete <i class="fa-solid fa-trash"> </i></a>
                 </div>
             </div>
-            {% if model.is_boxcox %}
-            <p>BoxCox, Lambda = {{model.lmbda}}</p>
-            {% endif %}
             <hr>
             <p><b>Box Cox: 
                 {{ model.is_boxcox | yesno:'Yes,No' }}
@@ -203,9 +202,6 @@
             
             <div class="modal-footer">
                 <button type="button" class="btn btn-outline-dark" data-bs-dismiss="modal">Cancel</button>
-                {%comment%}
-                <a class="btn btn-danger" href="{% url 'delete_winters' dataset model.id %}"><i class="fa-solid fa-trash"></i> Delete</a>
-                {%endcomment%}
                 <a class="btn btn-danger" href="{% url 'delete_model' dataset model.id %}"><i class="fa-solid fa-trash"></i> Delete</a>
                 <!-- {% comment %} <button type="button" class="btn btn-danger" href="{% url 'removeRecord' record.id %}">Save changes</button> {% endcomment %} -->
             </div>

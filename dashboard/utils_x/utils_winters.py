@@ -103,10 +103,7 @@ def model_winters(dataset_data, dataset_name, train_set_idx, trend, seasonal, da
 	# plt.savefig("static/images/" + filename, format = "png")
 	graph = get_graph()
 
-	model_name = 'Holt-Winters'
-
 	return {
-		"model_name" : model_name,
 		"graph" : graph,
 		# "filename" : filename,
 		"predictions" : predictions,

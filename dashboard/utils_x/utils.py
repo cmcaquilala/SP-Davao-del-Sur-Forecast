@@ -2,6 +2,9 @@ import base64
 from io import BytesIO
 from datetime import datetime
 import math
+import csv
+import json
+import os
 
 # stat-related
 # from statsmodels.graphics.tsaplots import plot_pacf
@@ -24,6 +27,7 @@ import matplotlib.pyplot as plt
 # import rpy2
 # import rpy2.robjects as robjects
 # from rpy2.robjects.packages import importr, data
+from rpy2.robjects.packages import importr
 
 # r_base = importr('base')
 # r_utils = importr('utils')
@@ -36,6 +40,25 @@ import matplotlib.pyplot as plt
 # r_stats = importr('stats')
 # r_forecast = importr('forecast')
 
+def get_r_package(pkg_name):
+	# Docker's Copy
+	lib_dir1 = '/usr/local/lib/R/site-library'
+	lib_dir2 = '/usr/lib/R/site-library'
+	lib_dir3 = '/usr/lib/R/library'
+
+	# Cedric's Copy
+	# lib_dir1 = 'C:/Users/Cedric/AppData/Local/R/win-library/4.3'
+	# lib_dir2 = 'C:/Program Files/R/R-4.3.0/library'
+	# lib_dir3 = None
+
+	try:
+		return importr(pkg_name, suppress_messages=False, lib_loc=lib_dir1)
+	except:
+		try:
+			return importr(pkg_name, suppress_messages=False, lib_loc=lib_dir2)
+		except:
+			return importr(pkg_name, suppress_messages=False, lib_loc=lib_dir3)
+
 def get_graph():
 	buffer = BytesIO()
 	plt.savefig(buffer, format='png')
@@ -44,11 +67,7 @@ def get_graph():
 	graph = base64.b64encode(image_png)
 	graph = graph.decode('utf-8')
 	buffer.close()
-	return graph
-
-def get_plot(x,y):
-	# ...
-	graph = get_graph()
+	plt.close()
 	return graph
 
 def plot_model(dataset_data, test_set_index, model):
@@ -103,9 +122,7 @@ def get_merged_graphs(sarima_models, bayesian_models, winters_models, lstm_model
 		for i in range(no_of_periods):
 			predictions.append(model['forecasts'][i])
 
-		plt.plot(forecast_dates, predictions,label="{0} {1}".format(
-			str(model['model_name']),
-			"BC " + str(model['lmbda']) if model['is_boxcox'] else ""))
+		plt.plot(forecast_dates, predictions,label="{0}".format(str(model['model_name'])))
 		plt.legend()
 
 	for model in bayesian_models:
@@ -117,9 +134,7 @@ def get_merged_graphs(sarima_models, bayesian_models, winters_models, lstm_model
 		for i in range(no_of_periods):
 			predictions.append(model['forecasts'][i])
 
-		plt.plot(forecast_dates, predictions,label="{0} {1}".format(
-			str(model['model_name']),
-			"BC " + str(model['lmbda']) if model['is_boxcox'] else ""))
+		plt.plot(forecast_dates, predictions,label="{0}".format(str(model['model_name'])))
 		plt.legend()
 
 	for model in winters_models:
@@ -131,9 +146,7 @@ def get_merged_graphs(sarima_models, bayesian_models, winters_models, lstm_model
 		for i in range(no_of_periods):
 			predictions.append(model['forecasts'][i])
 
-		plt.plot(forecast_dates, predictions,label="{0} {1}".format(
-			str(model['model_name']),
-			"BC " + str(model['lmbda']) if model['is_boxcox'] else ""))
+		plt.plot(forecast_dates, predictions,label="{0}".format(str(model['model_name'])))
 		plt.legend()
 
 	for model in lstm_models:
@@ -145,13 +158,71 @@ def get_merged_graphs(sarima_models, bayesian_models, winters_models, lstm_model
 		for i in range(no_of_periods):
 			predictions.append(model['forecasts'][i])
 
-		plt.plot(forecast_dates, predictions,label="{0} {1}".format(
-			str(model['model_name']),
-			"BC " + str(model['lmbda']) if model['is_boxcox'] else ""))
+		plt.plot(forecast_dates, predictions,label="{0}".format(str(model['model_name'])))
 		plt.legend()
 
-
 	return get_graph()
+
+
+def reload_dataset(request, dataset):
+	# Load dataset
+	dataset_dates = "{0}_dataset_dates".format(dataset.lower())
+	dataset_name = "{0}_dataset_data".format(dataset.lower())
+	dataset_data = pd.DataFrame()
+
+	request.session[dataset_dates] = []
+	request.session[dataset_name] = []
+
+	clear_all_models(request, dataset.lower())
+  
+	filename = "static/{0} data.csv".format(str.lower(dataset))  
+	with open(filename) as file:
+		reader = csv.reader(file)
+		readerlist = []
+		next(reader)
+        
+		for row in reader:
+			readerlist.append(row)
+
+	dataset_data = pd.DataFrame(readerlist, columns=['Date','Volume'])
+	dataset_data['Volume'] = pd.to_numeric(dataset_data['Volume'])
+	dataset_data['Date'] = pd.to_datetime(dataset_data['Date'])
+
+	request.session[dataset_dates] = dataset_data['Date'].astype(str).tolist()
+	request.session[dataset_name] = dataset_data['Volume'].tolist()
+	request.session.modified = True
+
+	load_best_models(request, dataset.lower())
+
+	return dataset_data
+
+
+def clear_all_models(request, dataset):
+	model_types = ["sarima", "bayesian", "winters", "lstm"]
+
+	for model_type in model_types:
+		newlist = [model for model in request.session["saved_{0}".format(model_type)] if model['dataset'].lower()!=dataset.lower()]
+		request.session["saved_{0}".format(model_type)] = newlist
+		request.session.modified = True
+
+
+def load_best_models(request, dataset):
+	model_dir = 'static/results/'
+	best_models = os.listdir(model_dir)
+	for filename in best_models:
+		with open("{0}{1}".format(model_dir, filename), 'r') as json_file:
+			model_results = json.load(json_file)
+			if model_results['dataset'].lower() == dataset:
+				save_json_to_session(request, model_results)
+
+
+def save_json_to_session(request, model_results):
+	model_results['id'] = get_timestamp()
+	model_type = model_results['model_type']
+
+	request.session['saved_{0}'.format(model_type)].append(model_results)
+	request.session.modified = True
+
 
 def get_MSE(actual, predictions):
 	total = 0

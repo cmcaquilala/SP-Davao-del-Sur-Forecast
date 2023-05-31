@@ -24,20 +24,16 @@ import rpy2
 import rpy2.robjects as robjects
 from rpy2.robjects.packages import importr, data
 
-r_base = importr('base')
-r_utils = importr('utils')
-r_generics = importr('generics')
-
-r_utils.chooseCRANmirror(ind=1)
-r_utils.install_packages('stats')
-r_utils.install_packages('forecast')
-
-r_stats = importr('stats')
-r_forecast = importr('forecast')
-
 
 def model_sarima(dataset_data, dataset_name, train_set_idx, my_order, my_seasonal_order, is_boxcox, lmbda):
+	r_base = get_r_package('base')
+	r_utils = get_r_package('utils')
+	r_generics = get_r_package('generics')
 
+	r_stats = get_r_package('stats')
+	r_forecast = get_r_package('forecast')
+	r_bayesforecast = get_r_package('bayesforecast')
+	
 	# Initialization
 	# 28*4 forecasts = up to 2050
 	test_set_date = dataset_data.iloc[-1]['Date']
@@ -75,7 +71,7 @@ def model_sarima(dataset_data, dataset_name, train_set_idx, my_order, my_seasona
 		r_lambda = r_null
 
 	# # create model
-	r_model = r_forecast.Arima(r_train_set, r_order, r_seasonal_order, r_null, True, False, False, r_lambda)
+	r_model = r_forecast.Arima(r_train_set, r_order, r_seasonal_order, r_null, True, False, False, r_lambda, False, "ML")
 
 	# fitting w/ test set
 	# r_predictions = r_stats.ts(r_test_set,start = [2020,1],frequency = 4)
@@ -100,7 +96,7 @@ def model_sarima(dataset_data, dataset_name, train_set_idx, my_order, my_seasona
 	for x in r_one_step_forecasts:
 		predictions.append(x)
 
-	for x in r_forecasts[3]:
+	for x in r_forecasts[1]:
 		forecasts.append(x)
 
 	# Model Evaluation
@@ -144,10 +140,7 @@ def model_sarima(dataset_data, dataset_name, train_set_idx, my_order, my_seasona
 	# plt.savefig("static/images/" + filename, format = "png")
 	graph = get_graph()
 
-	model_name = "SARIMA {0}{1}".format(my_order, my_seasonal_order)
-
 	return {
-		"model_name" : model_name,
 		"graph" : graph,
 		# "filename" : filename,
 		"predictions" : predictions,

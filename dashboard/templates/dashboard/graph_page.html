@@ -42,6 +42,14 @@
                 <h1 class="fw-bold">{{dataset}} Dataset</h1>
             </div>
             
+            <div class="row mb-2">
+                <div class="col-auto">
+                    <a class="btn btn-info btn-sm" href="{% url 'reload_models_page' dataset %}">Reset <i class="fa-solid fa-arrows-rotate"> </i></a>
+                </div>
+                <div class="col-auto"> 
+                    <a class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#uploadmodel">Upload <i class="fa-solid fa-upload"> </i></a>
+                </div>
+            </div>
             <div class="row mb-4">
                 <div class="col-auto">
                     <a class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#summary">Summary <i class="fa-solid fa-list"> </i></a>
@@ -104,9 +112,9 @@
                     <tbody>
                         {% for model in sarima_models %}
                         <tr>
-                            <td>{{model.model_name}}<sub>{{model.m_param}}</sub>
+                            <td>{{model.model_name}}
                                 {% if model.is_boxcox %}
-                                <p class="my-0">BoxCox, Lambda = {{model.lmbda}}</p>
+                                <!-- <p class="my-0">Lambda = {{model.lmbda}}</p> -->
                                 {% endif %}
                             </td>
                             <td>{{model.bic | intcomma}}</td>
@@ -122,12 +130,12 @@
                         {% endfor %}
                         {% for model in bayesian_models %}
                         <tr>
-                            <td>{{model.get_shorthand_str}}<sub>{{model.m_param}}</sub>
+                            <td>{{model.model_name}}
                                 {% if model.is_boxcox %}
-                                <p class="my-0">BoxCox, Lambda = {{model.lmbda}}</p>
+                                <!-- <p class="my-0">Lambda = {{model.lmbda}}</p> -->
                                 {% endif %}
                             </td>
-                            <td>{{model.bic | intcomma}}</td>
+                            <td>--</td>
                             <td>{{model.mse | intcomma}}</td>
                             <td>{{model.rmse | intcomma}}</td>
                             <td>{{model.mad | intcomma}}</td>
@@ -142,7 +150,7 @@
                         <tr>
                             <td>{{model.model_name}}
                                 {% if model.is_boxcox %}
-                                <p class="my-0">BoxCox, Lambda = {{model.lmbda}}</p>
+                                <!-- <p class="my-0">Lambda = {{model.lmbda}}</p> -->
                                 {% endif %}
                             </td>
                             <td>--</td>
@@ -158,9 +166,9 @@
                         {% endfor %}
                         {% for model in lstm_models %}
                         <tr>
-                            <td>{{model}}
+                            <td>{{model.model_name}}
                                 {% if model.is_boxcox %}
-                                <p class="my-0">BoxCox, Lambda = {{model.lmbda}}</p>
+                                <!-- <p class="my-0">Lambda = {{model.lmbda}}</p> -->
                                 {% endif %}
                             </td>
                             <td>--</td>
@@ -188,4 +196,33 @@
 </div>
 
 <!-- End Summary -->
+
+
+<!-- Upload Results -->
+<div class="modal fade" id="uploadmodel">
+    <div class="modal-dialog">
+        <form method="POST" action="{% url 'upload_results' dataset %}" enctype="multipart/form-data">
+            <div class="modal-content">
+            {% csrf_token %}
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Upload Results</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <div class="modal-body p-3">
+
+                    {{ upload_form.json_file | as_crispy_field }}
+
+                </div>
+                
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-dark" data-bs-dismiss="modal">Close <i class="fa-solid fa-x"> </i></button>
+                    <button type="Submit" class="btn btn-primary" >Save <i class="fa-solid fa-save"> </i></button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+<!-- End Upload Results -->
+
 {% endblock content %}
